@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 50" shape-rendering="crispEdges">
+    <!-- 8 horizontal stripes: white, red, blue, white, red, blue, white, red -->
+    <rect width="80" height="50" fill="#ffffff"/>
+    <rect y="6.25"  width="80" height="6.25" fill="#cc0000"/>
+    <rect y="12.5"  width="80" height="6.25" fill="#003478"/>
+    <rect y="25"    width="80" height="6.25" fill="#cc0000"/>
+    <rect y="31.25" width="80" height="6.25" fill="#003478"/>
+    <rect y="43.75" width="80" height="6.25" fill="#cc0000"/>
+
+    <!-- Union Jack canton (covers top 4 stripes, ~40% flag width) -->
+    <g>
+        <rect width="32" height="25" fill="#003478"/>
+        <!-- Saint Andrew's cross (white diagonals) -->
+        <path d="M0 0 L32 25 M32 0 L0 25" stroke="#ffffff" stroke-width="4"/>
+        <!-- Saint Patrick's cross (red diagonals, narrower) -->
+        <path d="M0 0 L32 25 M32 0 L0 25" stroke="#cf142b" stroke-width="2"/>
+        <!-- Saint George's cross (white) -->
+        <path d="M16 0 L16 25 M0 12.5 L32 12.5" stroke="#ffffff" stroke-width="6"/>
+        <!-- Saint George's cross (red, narrower) -->
+        <path d="M16 0 L16 25 M0 12.5 L32 12.5" stroke="#cf142b" stroke-width="3.5"/>
+    </g>
+</svg>

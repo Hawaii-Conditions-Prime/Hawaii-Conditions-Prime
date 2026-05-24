@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>For AI Agents — Hawaii Conditions MCP Server</title>
+      <meta name="description" content="MCP endpoint, tool catalog, payment flow, and discovery URLs for connecting AI agents to the Hawaii Conditions MCP Server.">
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+      <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+
+      <!-- Top nav (back to home) -->
+      <nav class="page-nav">
+          <a href="/">&larr; Back to Home</a>
+      </nav>
+
+      <!-- Page Hero -->
+      <section class="page-hero">
+          <h1>For <span class="highlight">AI Agents</span></h1>
+          <p>Real-time surf, weather, trails, volcano, ocean safety, sunrise/sunset and restaurant data for every Hawaiian island. Self-describing, MCP-native, and payable per call via a prepaid credit ledger.</p>
+      </section>
+
+      <!-- Striped Header (uniform with landing) -->
+      <div class="striped-header">
+          <div class="stripe stripe1"></div>
+          <div class="stripe stripe2"></div>
+          <div class="stripe stripe3"></div>
+          <div class="stripe stripe4"></div>
+          <div class="stripe stripe5"></div>
+      </div>
+
+      <!-- Content -->
+      <main class="page-content">
+
+          <h2>🚀 What this is</h2>
+          <p>A <strong>Model Context Protocol (MCP) server</strong> that gives AI agents structured, real-time data about Hawaii. Use it to plan trips, check safety conditions (ocean, trails, volcano), build itineraries, recommend restaurants, and generate full daily briefings.</p>
+
+          <h2>🌐 MCP Endpoint</h2>
+  <pre><code>https://hawaii-conditions.vercel.app/api/mcp</code></pre>
+          <p>Streamable HTTP transport. Stateless — every request is self-contained.</p>
+
+          <h2>⚡ Install on Your Agent</h2>
+          <p>Add HawaiiConditions skills to any client</p>
+<pre><code>npx agentcash add https://hawaii-conditions.vercel.app</code></pre>
+          <p>to install this MCP server on all AI Agents</p>
+
+          <h2>💳 How payment works (prepaid ledger)</h2>
+          <p>This server uses a <strong>prepaid credit model</strong>. Your agent registers once, receives an API key, funds its account via Stripe, and the balance is deducted per data call. No per-call payment prompts — just a running balance.</p>
+
+          <h3>Onboarding flow</h3>
+          <ol>
+              <li>Call <code>register_agent</code> &rarr; receive your <code>api_key</code> (format: <code>mcp_live_…</code>)</li>
+              <li>Call <code>create_wallet_setup</code> to initialise Stripe — returns a <code>client_secret</code> for saving a card</li>
+              <li>Call <code>save_payment_method</code> with the returned <code>payment_method_id</code></li>
+              <li>Call <code>add_funds_5</code>, <code>add_funds_10</code>, or <code>add_funds_20</code> to top up</li>
+              <li>Pass your key on every subsequent request via the <code>X-MCP-Account</code> header</li>
+          </ol>
+
+          <h3>Authenticating requests</h3>
+  <pre><code>X-MCP-Account: mcp_live_&lt;your_api_key&gt;</code></pre>
+          <p>Alternatively accepted as <code>Authorization: Bearer mcp_live_…</code>. All paid data tools require this header.</p>
+
+          <h3>Balance response (<code>get_balance</code>)</h3>
+  <pre><code>{
+    "balance_cents":          380,
+    "balance_usd":            "$3.80",
+    "original_balance_cents": 500,
+    "original_balance_usd":   "$5.00",
+    "low_balance":            false,
+    "threshold_usd":          "$0.50"
+  }</code></pre>
+          <p><code>original_balance_cents</code> is set on the first top-up and never changes — it records what the agent originally loaded. <code>balance_cents</code> decreases as data tools are called.</p>
+
+          <h3>Low-balance behaviour</h3>
+          <p>When <code>balance_cents</code> drops below the threshold, <code>low_balance: true</code> is returned with every response so your agent can self-top-up before running out.</p>
+
+          <h3>Example: register and fund in one session</h3>
+  <pre><code># 1 — Register
+  curl -X POST https://hawaii-conditions.vercel.app/api/mcp \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"register_agent","arguments":{"agent_id":"my-agent","display_name":"My Agent"}},"id":1}'
+
+  # 2 — Use the returned api_key on every data call
+  curl -X POST https://hawaii-conditions.vercel.app/api/mcp \
+    -H "Content-Type: application/json" \
+    -H "X-MCP-Account: mcp_live_&lt;your_key&gt;" \
+    -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"get_weather","arguments":{"island":"oahu"}},"id":2}'</code></pre>
+
+          <h2>🧠 Tools</h2>
+
+          <h3>Billing &amp; account management (free)</h3>
+          <table class="tools-table">
+              <thead>
+                  <tr><th>Tool</th><th>Cost</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                  <tr><td><code>register_agent</code></td><td><span class="price-free">Free</span></td><td>Create an account — returns your <code>api_key</code></td></tr>
+                  <tr><td><code>get_balance</code></td><td><span class="price-free">Free</span></td><td>Current balance, original load amount, low-balance flag</td></tr>
+                  <tr><td><code>create_wallet_setup</code></td><td><span class="price-free">Free</span></td><td>Initialise Stripe SetupIntent — returns <code>client_secret</code> for saving a card</td></tr>
+                  <tr><td><code>save_payment_method</code></td><td><span class="price-free">Free</span></td><td>Attach a Stripe payment method to your account</td></tr>
+                  <tr><td><code>link_stripe_customer</code></td><td><span class="price-free">Free</span></td><td>Link an existing Stripe customer ID to your account</td></tr>
+                  <tr><td><code>recent_transactions</code></td><td><span class="price-free">Free</span></td><td>View recent credits and debits on your ledger</td></tr>
+              </tbody>
+          </table>
+
+          <h3>Top-up (charged to saved card)</h3>
+          <table class="tools-table">
+              <thead>
+                  <tr><th>Tool</th><th>Amount</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                  <tr><td><code>add_funds_5</code></td><td><span class="price-paid">$5.00</span></td><td>Add $5 of prepaid MCP credit</td></tr>
+                  <tr><td><code>add_funds_10</code></td><td><span class="price-paid">$10.00</span></td><td>Add $10 of prepaid MCP credit</td></tr>
+                  <tr><td><code>add_funds_20</code></td><td><span class="price-paid">$20.00</span></td><td>Add $20 of prepaid MCP credit</td></tr>
+              </tbody>
+          </table>
+
+          <h3>Data tools (deducted from balance)</h3>
+          <table class="tools-table">
+              <thead>
+                  <tr><th>Tool</th><th>Cost per call</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                  <tr><td><code>ping</code></td><td><span class="price-free">Free</span></td><td>Health check — no balance required</td></tr>
+                  <tr><td><code>get_sun_times</code></td><td><span class="price-free">Free</span></td><td>Sunrise, sunset, daylight duration by island (HST)</td></tr>
+                  <tr><td><code>get_moon_phase</code></td><td><span class="price-free">Free</span></td><td>Current moon phase, illumination, moonrise/moonset times</td></tr>
+                  <tr><td><code>get_weather</code></td><td><span class="price-paid">$0.10</span></td><td>5-day forecast, UV index, wind, sunrise/sunset</td></tr>
+                  <tr><td><code>get_surf_conditions</code></td><td><span class="price-paid">$0.10</span></td><td>Wave height, period, direction + 3-day forecast</td></tr>
+                  <tr><td><code>get_trail_status</code></td><td><span class="price-paid">$0.25</span></td><td>NPS alerts and state trail closures</td></tr>
+                  <tr><td><code>get_volcano_status</code></td><td><span class="price-paid">$0.25</span></td><td>Live K&#x12b;lauea status from USGS HVO</td></tr>
+                  <tr><td><code>get_ocean_safety</code></td><td><span class="price-paid">$0.50</span></td><td>Box jellyfish, rip currents, NOAA marine alerts</td></tr>
+                  <tr><td><code>get_full_briefing</code></td><td><span class="price-paid">$2.00</span></td><td>All five data sources in one call — best value</td></tr>
+                  <tr><td><code>search_restaurants</code></td><td><span class="price-paid">$0.25</span></td><td>Find restaurants by location, cuisine, price, open hours</td></tr>
+                  <tr><td><code>get_restaurant_details</code></td><td><span class="price-paid">$0.15</span></td><td>Full hours, reviews, photos by <code>place_id</code></td></tr>
+              </tbody>
+          </table>
+
+          <h2>🤖 When AI agents should use this</h2>
+          <ul>
+              <li>Planning a Hawaii trip or itinerary</li>
+              <li>Checking if it&rsquo;s safe to swim, surf, or hike</li>
+              <li>Advising on beach or outdoor activities</li>
+              <li>Checking volcano or lava conditions</li>
+              <li>Building a day-by-day Hawaii plan</li>
+              <li>Recommending restaurants or food</li>
+              <li>Searching for poke, plate lunch, shave ice, loco moco, malasadas, acai bowls</li>
+              <li>Creating a foodie itinerary</li>
+          </ul>
+
+          <h2>🍽 Restaurant intelligence</h2>
+          <p>Supports neighbourhood targeting (Waikiki, North Shore, Lahaina, Hilo, etc.), cuisine filters (poke, sushi, vegan, seafood, etc.), price filtering ($ &rarr; $$$$), and open-now filtering.</p>
+          <p>Two-step flow: call <code>search_restaurants</code>, then <code>get_restaurant_details</code> with the returned <code>place_id</code>.</p>
+
+          <h2>🏝 Supported islands</h2>
+  <pre><code>oahu · maui · big-island · kauai · molokai · lanai</code></pre>
+
+          <h2>🔍 Discovery</h2>
+          <ul>
+              <li>Server card: <a href="/.well-known/mcp/server-card.json">/.well-known/mcp/server-card.json</a></li>
+              <li>Agent card: <a href="/.well-known/agent-card.json">/.well-known/agent-card.json</a></li>
+              <li>LLM instructions: <a href="/llms.txt">/llms.txt</a></li>
+              <li>Agent directives: <a href="/agents.txt">/agents.txt</a></li>
+              <li>Health: <a href="/health">/health</a></li>
+          </ul>
+
+          <h2>🧩 Built for</h2>
+          <ul>
+              <li>AI travel agents and itinerary builders</li>
+              <li>Concierge and tour-operator bots</li>
+              <li>Surf and ocean apps</li>
+              <li>Tourism and hospitality platforms</li>
+              <li>Food recommendation agents</li>
+          </ul>
+
+      </main>
+
+      <!-- Footer -->
+      <footer class="site-footer">
+          <p>&copy; 2026 Hawaii Conditions MCP Server &middot; <a href="agent.html">For AI Agents</a> &middot; <a href="skill.html">Skill Guide</a> &middot; <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy Policy</a></p>
+      </footer>
+
+  </body>
+  </html>
+  

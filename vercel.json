@@ -1,0 +1,26 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/heartbeat",
+      "schedule": "*/20 * * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/mcp",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin",  "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-MCP-Account, MCP-Session-Id" },
+        { "key": "Access-Control-Max-Age",       "value": "86400" }
+      ]
+    },
+    {
+      "source": "/.well-known/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control",               "value": "public, max-age=300" }
+      ]
+    }
+  ]
+}

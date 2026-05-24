@@ -1,0 +1,58 @@
+# Hawaii Conditions MCP Server — robots.txt
+  # https://hawaii-conditions.vercel.app
+
+  # ── Standard crawlers ────────────────────────────────────────────────────────
+  User-agent: *
+  Allow: /
+  Disallow: /stripe-webhook
+  Disallow: /api/
+
+  # ── AI crawlers ──────────────────────────────────────────────────────────────
+  User-agent: GPTBot
+  Allow: /
+
+  User-agent: OAI-SearchBot
+  Allow: /
+
+  User-agent: ChatGPT-User
+  Allow: /
+
+  User-agent: anthropic-ai
+  Allow: /
+
+  User-agent: Claude-Web
+  Allow: /
+
+  User-agent: ClaudeBot
+  Allow: /
+
+  User-agent: Google-Extended
+  Allow: /
+
+  User-agent: Googlebot
+  Allow: /
+
+  User-agent: PerplexityBot
+  Allow: /
+
+  User-agent: CCBot
+  Disallow: /
+
+  User-agent: FacebookBot
+  Allow: /
+
+  User-agent: meta-externalagent
+  Allow: /
+
+  User-agent: Applebot
+  Allow: /
+
+  User-agent: Applebot-Extended
+  Allow: /
+
+  # ── Content Signals ───────────────────────────────────────────────────────────
+  Content-Signal: ai-train=no, search=yes, ai-input=yes
+
+  # ── Discovery ─────────────────────────────────────────────────────────────────
+  Sitemap: https://hawaii-conditions.vercel.app/sitemap.xml
+  

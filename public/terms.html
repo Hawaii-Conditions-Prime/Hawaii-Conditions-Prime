@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Terms of Service — Hawaii Conditions MCP Server</title>
+      <meta name="description" content="Terms of service for the Hawaii Conditions MCP Server prepaid API.">
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+      <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+
+      <nav class="page-nav">
+          <a href="/">&larr; Back to Home</a>
+      </nav>
+
+      <section class="page-hero">
+          <h1><strong>Terms</strong> <span class="highlight">of Service</span></h1>
+          <p>Please read these terms carefully before using the Hawaii Conditions MCP Server.</p>
+      </section>
+
+      <div class="striped-header">
+          <div class="stripe stripe1"></div>
+          <div class="stripe stripe2"></div>
+          <div class="stripe stripe3"></div>
+          <div class="stripe stripe4"></div>
+          <div class="stripe stripe5"></div>
+      </div>
+
+      <main class="page-content">
+
+          <p><em>Last updated: April 2026</em></p>
+
+          <h2>1. Acceptance of terms</h2>
+          <p>By accessing or using the Hawaii Conditions MCP Server (&ldquo;the Service&rdquo;), including by calling any endpoint at <code>https://hawaii-conditions.vercel.app/mcp</code>, you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+
+          <h2>2. Description of service</h2>
+          <p>The Service provides real-time environmental and location data for the Hawaiian Islands — including surf conditions, weather forecasts, trail status, volcano activity, ocean safety alerts, sunrise/sunset times, and restaurant information — via a Model Context Protocol (MCP) API. The Service is designed for integration with AI agents, applications, and automated systems.</p>
+
+          <h2>3. Prepaid credit accounts</h2>
+          <p>Access to paid data tools requires a prepaid credit balance. By registering an agent account you agree to the following:</p>
+          <ul>
+              <li><strong>Registration:</strong> You must call <code>register_agent</code> to obtain an API key. Your API key is shown only once and is your responsibility to store securely.</li>
+              <li><strong>Funding:</strong> Credits are purchased in advance via Stripe. All purchases are final. Credits have no cash value and are non-refundable except as required by applicable law.</li>
+              <li><strong>Deductions:</strong> Balance is deducted each time a paid tool is successfully called. Prices are listed on the <a href="/agent.html">For AI Agents</a> page and in the tool descriptions returned by <code>tools/list</code>.</li>
+              <li><strong>Low balance:</strong> You are responsible for maintaining a sufficient balance. The Service will return a <code>low_balance</code> flag as a warning. We do not guarantee uninterrupted access when balance reaches zero.</li>
+              <li><strong>Expiry:</strong> Unused credits do not expire provided your account remains in good standing.</li>
+          </ul>
+
+          <h2>4. Payments and Stripe</h2>
+          <p>All payment processing is handled by Stripe, Inc. By saving a payment method or making a purchase you also agree to <a href="https://stripe.com/legal/ssa" target="_blank" rel="noopener">Stripe&rsquo;s terms of service</a>. We do not store your full card number or CVV. Your Stripe customer ID and payment method ID are stored in our database solely to enable autonomous top-ups.</p>
+
+          <h2>5. Acceptable use</h2>
+          <p>You agree not to:</p>
+          <ul>
+              <li>Attempt to circumvent billing, rate limits, or authentication</li>
+              <li>Resell or redistribute API access or raw data without written permission</li>
+              <li>Use the Service in any way that violates applicable law</li>
+              <li>Overload or disrupt the Service through excessive or abusive request patterns</li>
+              <li>Use the Service to create products that compete directly with the Service without disclosure</li>
+          </ul>
+
+          <h2>6. Data accuracy and disclaimers</h2>
+          <p>Data provided by the Service is sourced from third parties including NOAA, USGS Hawaiian Volcano Observatory, National Park Service, Open-Meteo, and Google Places. We make no warranties, express or implied, about the accuracy, completeness, or timeliness of any data.</p>
+          <p><strong>The Service must not be used as the sole basis for safety-critical decisions.</strong> Ocean conditions, trail closures, volcano activity, and weather can change rapidly. Always verify safety information from official local sources before undertaking any activity.</p>
+
+          <h2>7. Availability and modifications</h2>
+          <p>We do not guarantee continuous or uninterrupted availability of the Service. We reserve the right to modify, suspend, or discontinue any part of the Service at any time. Prices may change with reasonable notice posted on this site.</p>
+
+          <h2>8. API keys and account security</h2>
+          <p>Your API key grants access to your prepaid balance. You are solely responsible for keeping it confidential. Any usage under your API key is your responsibility regardless of whether it was authorised by you. If you believe your key has been compromised, you should contact us immediately.</p>
+
+          <h2>9. Intellectual property</h2>
+          <p>The Service, including its software, design, and documentation, is proprietary. Data returned by the Service is sourced from public or licensed third-party providers. You may use returned data for your own applications subject to the terms of those upstream providers.</p>
+
+          <h2>10. Limitation of liability</h2>
+          <p>To the maximum extent permitted by law, the Service is provided &ldquo;as is&rdquo; without warranty of any kind. In no event shall Hawaii Conditions MCP Server be liable for any indirect, incidental, special, or consequential damages arising from your use of the Service, including but not limited to loss of data, loss of revenue, or personal injury arising from reliance on data provided by the Service.</p>
+
+          <h2>11. Governing law</h2>
+          <p>These terms are governed by the laws of the State of Hawaii, United States, without regard to conflict of law principles.</p>
+
+          <h2>12. Changes to these terms</h2>
+          <p>We may update these terms from time to time. Continued use of the Service after changes are posted constitutes acceptance of the revised terms. The &ldquo;Last updated&rdquo; date at the top of this page reflects the most recent revision.</p>
+
+          <h2>13. Contact</h2>
+          <p>For questions about these terms, data accuracy concerns, or account issues, please reach out via the contact information on the <a href="/">home page</a>.</p>
+
+      </main>
+
+      <footer class="site-footer">
+          <p>&copy; 2026 Hawaii Conditions MCP Server &middot; <a href="agent.html">For AI Agents</a> &middot; <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy Policy</a></p>
+      </footer>
+
+  </body>
+  </html>

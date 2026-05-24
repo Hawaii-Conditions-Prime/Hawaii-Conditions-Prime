@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Agent Skill Guide — Hawaii Conditions MCP Server</title>
+      <meta name="description" content="Complete integration guide for AI agents: prepaid ledger flow, all 19 tools, authentication, and code examples.">
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+      <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+
+      <nav class="page-nav">
+          <a href="/">&larr; Back to Home</a>
+      </nav>
+
+      <section class="page-hero">
+          <h1>Agent <span class="highlight">Skill Guide</span></h1>
+          <p>Everything an AI agent needs to register, fund, and call the Hawaii Conditions MCP Server. Also available as <a href="/skill.md">raw markdown</a> for programmatic ingestion.</p>
+      </section>
+
+      <div class="striped-header">
+          <div class="stripe stripe1"></div>
+          <div class="stripe stripe2"></div>
+          <div class="stripe stripe3"></div>
+          <div class="stripe stripe4"></div>
+          <div class="stripe stripe5"></div>
+      </div>
+
+      <main class="page-content">
+
+          <h2>🌐 MCP Endpoint</h2>
+  <pre><code>https://hawaii-conditions.vercel.app/mcp</code></pre>
+          <p>Streamable HTTP transport. Stateless — every request is self-contained.</p>
+
+          <h2>💳 How payment works (prepaid ledger)</h2>
+          <p>This server uses a <strong>prepaid credit model</strong>. Your agent registers once, receives an API key, funds its account via Stripe, and balance is deducted per data call. No per-call payment prompts — just a running balance.</p>
+
+          <h3>Onboarding flow</h3>
+          <ol>
+              <li>Call <code>register_agent</code> &rarr; receive your <code>api_key</code> (format: <code>mcp_live_&hellip;</code>) — <strong>store immediately, shown only once</strong></li>
+              <li>Call <code>create_wallet_setup</code> &rarr; returns <code>client_secret</code> for saving a card via Stripe</li>
+              <li>Call <code>save_payment_method</code> with the returned <code>payment_method_id</code></li>
+              <li>Call <code>add_funds_5</code>, <code>add_funds_10</code>, or <code>add_funds_20</code> to top up</li>
+              <li>Pass your key on every subsequent request via <code>X-MCP-Account</code></li>
+          </ol>
+
+          <h3>Authenticating requests</h3>
+  <pre><code>X-MCP-Account: mcp_live_&lt;your_api_key&gt;</code></pre>
+          <p>Also accepted as <code>Authorization: Bearer mcp_live_&hellip;</code></p>
+
+          <h3>Balance fields (<code>get_balance</code> response)</h3>
+          <table class="tools-table">
+              <thead><tr><th>Field</th><th>Description</th></tr></thead>
+              <tbody>
+                  <tr><td><code>balance_cents</code></td><td>Current spendable balance — decreases with each paid call</td></tr>
+                  <tr><td><code>balance_usd</code></td><td>Formatted, e.g. <code>"$3.80"</code></td></tr>
+                  <tr><td><code>original_balance_cents</code></td><td>Amount from first top-up — locked forever, never changes</td></tr>
+                  <tr><td><code>original_balance_usd</code></td><td>Formatted, e.g. <code>"$5.00"</code></td></tr>
+                  <tr><td><code>low_balance</code></td><td><code>true</code> when balance is near zero — agent should self-top-up</td></tr>
+                  <tr><td><code>threshold_usd</code></td><td>The low-balance threshold value</td></tr>
+              </tbody>
+          </table>
+
+          <h2>🧠 Tools</h2>
+
+          <h3>Billing &amp; account management (free)</h3>
+          <table class="tools-table">
+              <thead><tr><th>Tool</th><th>Cost</th><th>Description</th></tr></thead>
+              <tbody>
+                  <tr><td><code>register_agent</code></td><td><span class="price-free">Free</span></td><td>Create account — returns <code>api_key</code></td></tr>
+                  <tr><td><code>get_balance</code></td><td><span class="price-free">Free</span></td><td>Current balance, original load amount, low-balance flag</td></tr>
+                  <tr><td><code>create_wallet_setup</code></td><td><span class="price-free">Free</span></td><td>Returns Stripe SetupIntent <code>client_secret</code> for card collection</td></tr>
+                  <tr><td><code>save_payment_method</code></td><td><span class="price-free">Free</span></td><td>Attach a Stripe <code>pm_&hellip;</code> payment method</td></tr>
+                  <tr><td><code>link_stripe_customer</code></td><td><span class="price-free">Free</span></td><td>Link an existing Stripe <code>cus_&hellip;</code> customer ID</td></tr>
+                  <tr><td><code>recent_transactions</code></td><td><span class="price-free">Free</span></td><td>View recent credits and debits on the ledger</td></tr>
+              </tbody>
+          </table>
+
+          <h3>Top-up (charged to saved card)</h3>
+          <table class="tools-table">
+              <thead><tr><th>Tool</th><th>Amount</th><th>Description</th></tr></thead>
+              <tbody>
+                  <tr><td><code>add_funds_5</code></td><td><span class="price-paid">$5.00</span></td><td>Add $5 of prepaid credit</td></tr>
+                  <tr><td><code>add_funds_10</code></td><td><span class="price-paid">$10.00</span></td><td>Add $10 of prepaid credit</td></tr>
+                  <tr><td><code>add_funds_20</code></td><td><span class="price-paid">$20.00</span></td><td>Add $20 of prepaid credit</td></tr>
+              </tbody>
+          </table>
+
+          <h3>Data tools (deducted from balance)</h3>
+          <table class="tools-table">
+              <thead><tr><th>Tool</th><th>Cost</th><th>Description</th></tr></thead>
+              <tbody>
+                  <tr><td><code>ping</code></td><td><span class="price-free">Free</span></td><td>Health check — no balance required</td></tr>
+                  <tr><td><code>get_sun_times</code></td><td><span class="price-free">Free</span></td><td>Sunrise, sunset, daylight duration by island (HST)</td></tr>
+                  <tr><td><code>get_weather</code></td><td><span class="price-paid">$0.10</span></td><td>5-day forecast, UV index, wind, sunrise/sunset</td></tr>
+                  <tr><td><code>get_surf_conditions</code></td><td><span class="price-paid">$0.10</span></td><td>Wave height, period, direction + 3-day forecast</td></tr>
+                  <tr><td><code>get_trail_status</code></td><td><span class="price-paid">$0.25</span></td><td>NPS alerts and state trail closures</td></tr>
+                  <tr><td><code>get_volcano_status</code></td><td><span class="price-paid">$0.25</span></td><td>Live K&#x12b;lauea status from USGS HVO</td></tr>
+                  <tr><td><code>get_ocean_safety</code></td><td><span class="price-paid">$0.50</span></td><td>Box jellyfish, rip currents, NOAA marine alerts</td></tr>
+                  <tr><td><code>get_full_briefing</code></td><td><span class="price-paid">$2.00</span></td><td>All five data sources in one call — best value</td></tr>
+                  <tr><td><code>search_restaurants</code></td><td><span class="price-paid">$0.25</span></td><td>Find restaurants by location, cuisine, price, hours</td></tr>
+                  <tr><td><code>get_restaurant_details</code></td><td><span class="price-paid">$0.15</span></td><td>Full hours, reviews, photos by <code>place_id</code></td></tr>
+              </tbody>
+          </table>
+
+          <h2>🏝 Supported islands</h2>
+  <pre><code>oahu · maui · big island · kauai · molokai · lanai</code></pre>
+
+          <h2>⚡ Quick-start example</h2>
+  <pre><code>// Step 1 — Register (do this once)
+  const reg = await fetch("https://hawaii-conditions.vercel.app/mcp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0", method: "tools/call",
+      params: { name: "register_agent",
+                arguments: { agent_id: "my-agent-001", display_name: "My Agent" } },
+      id: 1
+    })
+  });
+  const { api_key } = await reg.json(); // store permanently
+
+  // Step 2 — Call a data tool
+  const weather = await fetch("https://hawaii-conditions.vercel.app/mcp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-MCP-Account": api_key },
+    body: JSON.stringify({
+      jsonrpc: "2.0", method: "tools/call",
+      params: { name: "get_weather", arguments: { island: "maui" } },
+      id: 2
+    })
+  });</code></pre>
+
+          <h2>🔍 Discovery URLs</h2>
+          <table class="tools-table">
+              <thead><tr><th>URL</th><th>Purpose</th></tr></thead>
+              <tbody>
+                  <tr><td><a href="/mcp"><code>/mcp</code></a></td><td>MCP endpoint</td></tr>
+                  <tr><td><a href="/skill.md"><code>/skill.md</code></a></td><td>This skill in raw markdown</td></tr>
+                  <tr><td><a href="/llms.txt"><code>/llms.txt</code></a></td><td>LLM system prompt instructions</td></tr>
+                  <tr><td><a href="/agents.txt"><code>/agents.txt</code></a></td><td>Agent directives</td></tr>
+                  <tr><td><a href="/.well-known/mcp/server-card.json"><code>/.well-known/mcp/server-card.json</code></a></td><td>MCP server card</td></tr>
+                  <tr><td><a href="/.well-known/agent-card.json"><code>/.well-known/agent-card.json</code></a></td><td>Agent card (A2A)</td></tr>
+                  <tr><td><a href="/health"><code>/health</code></a></td><td>Health check</td></tr>
+              </tbody>
+          </table>
+
+      </main>
+
+      <footer class="site-footer">
+          <p>&copy; 2026 Hawaii Conditions MCP Server &middot; <a href="agent.html">For AI Agents</a> &middot; <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy Policy</a></p>
+      </footer>
+
+  </body>
+  </html>

@@ -1,0 +1,31 @@
+{
+  "name": "hawaii-conditions-mcp",
+  "version": "1.0.5",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "type-check": "tsc --noEmit",
+    "db:migrate": "psql $DATABASE_URL -f scripts/db-migrate.sql",
+    "mpp:scan": "npx -y @agentcash/discovery@latest discover \"https://hawaii-conditions.vercel.app\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@neondatabase/serverless": "^0.10.4",
+    "next": "^15.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "stripe": "^17.0.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

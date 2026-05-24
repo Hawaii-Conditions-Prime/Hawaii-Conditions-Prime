@@ -1,0 +1,205 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Spacemandomains/hawaii-conditions",
+  "title": "Hawaii Conditions MCP Server",
+  "description": "Real-time surf, weather, trail status, volcano, ocean safety, and restaurants for Hawaii.",
+  "version": "1.0.5",
+  "websiteUrl": "https://hawaii-conditions.vercel.app",
+  "repository": {
+    "url": "https://github.com/spacemandomains/2_hawaii_conditions_mcp_server",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://hawaii-conditions.vercel.app/api/mcp"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ping",
+      "description": "Health check — returns server status. Free.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "register_agent",
+      "description": "Create a prepaid account. Returns api_key (mcp_live_…). Store it immediately — shown only once. Free.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_id":     { "type": "string", "description": "Optional unique identifier for this agent" },
+          "display_name": { "type": "string", "description": "Human-readable name for this agent" }
+        }
+      }
+    },
+    {
+      "name": "get_balance",
+      "description": "Returns current balance, original load amount, and low-balance flag. Free.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "description": "Optional api key. Prefer X-MCP-Account header." }
+        }
+      }
+    },
+    {
+      "name": "create_wallet_setup",
+      "description": "Initialise Stripe SetupIntent — returns client_secret for saving a card. Free.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "save_payment_method",
+      "description": "Attach a Stripe payment method (pm_…) to your account for autonomous top-ups. Free.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["payment_method_id"],
+        "properties": {
+          "payment_method_id": { "type": "string", "description": "Stripe payment method ID (pm_…)" }
+        }
+      }
+    },
+    {
+      "name": "link_stripe_customer",
+      "description": "Link an existing Stripe customer ID (cus_…) to your account. Free.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["customer_id"],
+        "properties": {
+          "customer_id": { "type": "string", "description": "Stripe customer ID (cus_…)" }
+        }
+      }
+    },
+    {
+      "name": "recent_transactions",
+      "description": "View recent credits and debits (default 20, max 50). Free.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "description": "Optional api key. Prefer X-MCP-Account header." },
+          "limit":   { "type": "number", "description": "Number of transactions to return (max 50)", "default": 20 }
+        }
+      }
+    },
+    {
+      "name": "add_funds_5",
+      "description": "Charge your saved card $5 — balance credited after Stripe confirmation. Free to call.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "add_funds_10",
+      "description": "Charge your saved card $10 — balance credited after Stripe confirmation. Free to call.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "add_funds_20",
+      "description": "Charge your saved card $20 — balance credited after Stripe confirmation. Free to call.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "get_sun_times",
+      "description": "Sunrise, sunset, and daylight duration by island (HST). Free.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "island": { "type": "string", "enum": ["oahu", "maui", "kauai", "big-island", "molokai", "lanai"], "default": "oahu" },
+          "date":   { "type": "string", "description": "Date in YYYY-MM-DD format (defaults to today)" }
+        }
+      }
+    },
+    {
+      "name": "get_moon_phase",
+      "description": "Moon phase, illumination %, moonrise/moonset, days to next full/new moon. Free.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "description": "Date in YYYY-MM-DD format (defaults to today)" }
+        }
+      }
+    },
+    {
+      "name": "get_weather",
+      "description": "5-day forecast, UV index, wind, sunrise/sunset by island. Cost: $0.10.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["island"],
+        "properties": {
+          "island": { "type": "string", "enum": ["oahu", "maui", "kauai", "big-island", "molokai", "lanai"], "description": "Island name" }
+        }
+      }
+    },
+    {
+      "name": "get_surf_conditions",
+      "description": "Wave height, period, direction + 3-day surf forecast by island. Cost: $0.10.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["island"],
+        "properties": {
+          "island": { "type": "string", "enum": ["oahu", "maui", "kauai", "big-island", "molokai", "lanai"], "description": "Island name" }
+        }
+      }
+    },
+    {
+      "name": "get_trail_status",
+      "description": "NPS alerts and state trail closures by island. Cost: $0.25.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["island"],
+        "properties": {
+          "island": { "type": "string", "enum": ["oahu", "maui", "kauai", "big-island", "molokai", "lanai"], "description": "Island name" }
+        }
+      }
+    },
+    {
+      "name": "get_volcano_status",
+      "description": "Live Kīlauea status from USGS HVO. Cost: $0.25.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "get_ocean_safety",
+      "description": "Box jellyfish, rip currents, NOAA marine alerts by island. Cost: $0.50.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["island"],
+        "properties": {
+          "island": { "type": "string", "enum": ["oahu", "maui", "kauai", "big-island", "molokai", "lanai"], "description": "Island name" }
+        }
+      }
+    },
+    {
+      "name": "get_full_briefing",
+      "description": "Weather, surf, trails, volcano, ocean safety combined — best value. Cost: $2.00.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["island"],
+        "properties": {
+          "island": { "type": "string", "enum": ["oahu", "maui", "kauai", "big-island", "molokai", "lanai"], "description": "Island name" }
+        }
+      }
+    },
+    {
+      "name": "search_restaurants",
+      "description": "Find restaurants by location, cuisine, price range, open-now filter. Cost: $0.25.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["location"],
+        "properties": {
+          "location": { "type": "string", "description": "Location to search (e.g. Waikiki, Kailua, Lahaina)" },
+          "cuisine":  { "type": "string", "description": "Cuisine type (e.g. Hawaiian, Japanese, Mexican)" },
+          "price":    { "type": "string", "enum": ["$", "$$", "$$$", "$$$$"], "description": "Price range" },
+          "open_now": { "type": "boolean", "description": "Filter for currently open restaurants" }
+        }
+      }
+    },
+    {
+      "name": "get_restaurant_details",
+      "description": "Full hours, reviews, photos for a restaurant by place_id. Cost: $0.15.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["place_id"],
+        "properties": {
+          "place_id": { "type": "string", "description": "Google place_id returned from search_restaurants" }
+        }
+      }
+    }
+  ]
+}

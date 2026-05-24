@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hawaii Conditions — Real-time conditions for AI agents</title>
+    <meta name="description" content="Real-time surf, weather, trails, volcano, ocean safety, and restaurant data for every Hawaiian island. Built for AI agents. Powered by NOAA, USGS, NPS, Open-Meteo and Google Places.">
+    <meta property="og:title" content="Hawaii Conditions — Real-time conditions for AI agents">
+    <meta property="og:description" content="Real-time surf, weather, trails, volcano, ocean safety, and restaurant data for every Hawaiian island. Built for AI agents.">
+    <meta property="og:url" content="https://hawaii-conditions.vercel.app">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <!-- Left Side (Heading & Subtext) -->
+            <div class="hero-text">
+                <h1><strong>Hawaii</strong></h1>
+                <h1><strong>Conditions</strong></h1>
+                <p><span class="subtext">By Hawaii&rsquo;s <strong>Real-time API</strong></span></p>
+            </div>
+
+            <!-- Right Side (CTA & Text) for Desktop -->
+            <div class="hero-action">
+                <p>Real-time conditions <br> for AI agents <br> <span class="highlight">exploring Hawaii</span></p>
+                <div class="buttons">
+                    <a href="agent.html" class="btn primary">Explore Tools</a>
+                    <a href="https://replit.com/integrations?mcp=eyJkaXNwbGF5TmFtZSI6Ikhhd2FpaSBDb25kaXRpb25zIE1DUCBTZXJ2ZXIiLCJiYXNlVXJsIjoiaHR0cHM6Ly9oYXdhaWktY29uZGl0aW9ucy52ZXJjZWwuYXBwL2FwaS9tY3AifQo=" class="btn replit" target="_blank" rel="noopener">
+                        <img src="https://replit.com/badge?caption=Add%20to%20Replit" alt="Add to Replit">
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Side (CTA & Text) for Mobile -->
+            <div class="hero-action-mobile">
+                <p>Real-time conditions <br> for AI agents <br> <span class="highlight">exploring Hawaii</span></p>
+                <div class="buttons">
+                    <a href="agent.html" class="btn primary">Explore Tools</a>
+                    <a href="https://replit.com/integrations?mcp=eyJkaXNwbGF5TmFtZSI6Ikhhd2FpaSBDb25kaXRpb25zIE1DUCBTZXJ2ZXIiLCJiYXNlVXJsIjoiaHR0cHM6Ly9oYXdhaWktY29uZGl0aW9ucy52ZXJjZWwuYXBwL2FwaS9tY3AifQo=" class="btn replit" target="_blank" rel="noopener">
+                        <img src="https://replit.com/badge?caption=Add%20to%20Replit" alt="Add to Replit">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Striped Header -->
+    <div class="striped-header">
+        <div class="stripe stripe1"></div>
+        <div class="stripe stripe2"></div>
+        <div class="stripe stripe3"></div>
+        <div class="stripe stripe4"></div>
+        <div class="stripe stripe5"></div>
+    </div>
+
+    <div class="carousel-container">
+        <div class="carousel">
+            <div class="card"><p>📡 Ping &ndash; Free health check to verify connectivity before paid calls.</p></div>
+            <div class="card"><p>🌊 Surf Conditions &ndash; Wave height, period, direction &amp; 3-day forecasts.</p></div>
+            <div class="card"><p>🌤 Weather &ndash; Hyperlocal temp, UV, wind &amp; 5-day forecasts per island.</p></div>
+            <div class="card"><p>🥾 Trail Status &ndash; Live NPS alerts and state trail closures.</p></div>
+            <div class="card"><p>🌋 Volcano Activity &ndash; Kīlauea eruption status &amp; USGS notices.</p></div>
+            <div class="card"><p>🚨 Ocean Safety &ndash; Box jellyfish, rip currents &amp; high surf advisories.</p></div>
+            <div class="card"><p>🍽 Restaurants &ndash; poke, plate lunch, shave ice &amp; hidden gems.</p></div>
+            <div class="card"><p>🌅 Sunrise &amp; Sunset &ndash; Daily times for every Hawaiian island. Free.</p></div>
+            <div class="card"><p>📋 Full Briefing &ndash; Weather, surf, trails, volcano &amp; ocean in one call.</p></div>
+        </div>
+    </div>
+
+    <!-- Install Section -->
+    <section class="install-section">
+        <h2>Install on Your Agent</h2>
+        <p class="install-sub">Add HawaiiConditions skills to any client</p>
+        <pre class="install-cmd">npx agentcash add https://hawaii-conditions.vercel.app</pre>
+        <p class="install-note">to install my MCP server on all AI Agents</p>
+        <p class="install-sub" style="margin-top:1.5rem;">Or connect directly via MCP endpoint</p>
+        <pre class="install-cmd">https://hawaii-conditions.vercel.app/api/mcp</pre>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section class="install-section" style="background:#efeae0; padding-top:48px; padding-bottom:56px;">
+        <h2>Quick Start</h2>
+        <p class="install-sub">Register and fund your account in one session</p>
+
+        <p class="install-note" style="margin-bottom:0.5rem; font-weight:600; color:#2f2e2d;">Step 1 — Register (free, returns your api_key)</p>
+        <pre class="install-cmd" style="text-align:left;">curl -X POST https://hawaii-conditions.vercel.app/api/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"register_agent","arguments":{"display_name":"My Agent"}},"id":1}'</pre>
+
+        <p class="install-note" style="margin-top:1.5rem; margin-bottom:0.5rem; font-weight:600; color:#2f2e2d;">Step 2 — Add $5 (use your api_key from Step 1)</p>
+        <pre class="install-cmd" style="text-align:left;">curl -X POST https://hawaii-conditions.vercel.app/api/mcp \
+  -H "Content-Type: application/json" \
+  -H "X-MCP-Account: mcp_live_YOUR_KEY" \
+  -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"add_funds_5","arguments":{}},"id":2}'</pre>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>&copy; 2026 Hawaii Conditions MCP Server &middot; <a href="agent.html">For AI Agents</a> &middot; <a href="skill.html">Skill Guide</a> &middot; <a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy Policy</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

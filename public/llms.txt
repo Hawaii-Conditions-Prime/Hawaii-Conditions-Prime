@@ -1,0 +1,64 @@
+# HawaiiConditions MCP Server
+
+Remote MCP server (Streamable HTTP) providing real-time Hawaii conditions data.
+
+## Endpoint
+https://hawaii-conditions.vercel.app/mcp
+
+## Authentication
+This server uses a prepaid credit model. Register once, fund your account, then use the API key on every paid call.
+
+### Step 1 — Register (free, no credentials needed)
+Call the `register_agent` tool. It returns your `api_key` (format: mcp_live_…). Store it immediately.
+
+### Step 2 — Save a payment method (free)
+Call `create_wallet_setup` to get a Stripe SetupIntent client_secret, then `save_payment_method` with the pm_… ID.
+
+### Step 3 — Add funds (charged to saved card)
+Call `add_funds_5`, `add_funds_10`, or `add_funds_20`. Balance is credited instantly.
+
+### Every request
+Pass your api_key in the header:
+  X-MCP-Account: mcp_live_<your_key>
+  (also accepted as: Authorization: Bearer mcp_live_<your_key>)
+
+## Tools
+
+### Free (no balance required)
+- ping — health check
+- get_sun_times — sunrise, sunset, daylight duration (HST)
+- get_moon_phase — moon phase, illumination %, moonrise/moonset, days to next full/new moon
+- register_agent — create prepaid account, returns api_key
+- get_balance — current balance, original load, low-balance flag
+- create_wallet_setup — Stripe SetupIntent for saving a card
+- save_payment_method — attach pm_… to account
+- link_stripe_customer — link existing cus_… to account
+- recent_transactions — ledger history
+- add_funds_5 / add_funds_10 / add_funds_20 — top up balance
+
+### Paid data tools
+- get_weather ($0.10) — 5-day forecast, UV, wind, sunrise/sunset
+- get_surf_conditions ($0.10) — wave height, period, direction + forecast
+- get_trail_status ($0.25) — NPS alerts and trail closures
+- get_volcano_status ($0.25) — live Kīlauea status from USGS HVO
+- search_restaurants ($0.25) — find restaurants by location, cuisine, price
+- get_restaurant_details ($0.15) — full hours, reviews, photos
+- get_ocean_safety ($0.50) — jellyfish, rip currents, NOAA marine alerts
+- get_full_briefing ($2.00) — all five data sources in one call (best value)
+
+## Supported islands
+oahu · maui · big island · kauai · molokai · lanai
+
+## Low-balance behaviour
+When balance_cents drops below the threshold:
+- get_balance returns low_balance: true
+- Call add_funds_5/10/20 to top up autonomously (no human needed)
+- The saved card is charged off-session instantly
+
+## When to use this server
+- Planning a Hawaii trip or day itinerary
+- Checking if it’s safe to swim, surf, or hike
+- Advising on beach or outdoor activities
+- Checking volcano or lava conditions
+- Building a day-by-day Hawaii plan
+- Recommending restaurants or food

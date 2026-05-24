@@ -1,0 +1,1414 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HawaiiConditions",
+    "version": "1.0.5",
+    "description": "HawaiiConditions — real-time Hawaii conditions with prepaid-balance payments via Stripe card."
+  },
+  "paths": {
+    "/api/mcp": {
+      "get": {
+        "operationId": "mcp_info",
+        "summary": "MCP server info and tool list",
+        "tags": [
+          "MCP"
+        ],
+        "x-payment-info": {
+          "price": 0,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "free"
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Server info and tools"
+          }
+        }
+      },
+      "post": {
+        "operationId": "mcp_message",
+        "summary": "Send MCP JSON-RPC 2.0 message",
+        "tags": [
+          "MCP"
+        ],
+        "x-payment-info": {
+          "price": 0,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "free"
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Message processed"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jsonrpc": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "jsonrpc",
+                  "method"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/weather": {
+      "get": {
+        "operationId": "get_weather",
+        "summary": "Get current Hawaii weather conditions",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.1,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "island",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "oahu",
+                "maui",
+                "kauai",
+                "big-island",
+                "molokai",
+                "lanai"
+              ],
+              "default": "oahu"
+            }
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_weather",
+        "summary": "Get current Hawaii weather conditions (POST)",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.1,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "island": {
+                    "type": "string",
+                    "enum": [
+                      "oahu",
+                      "maui",
+                      "kauai",
+                      "big-island",
+                      "molokai",
+                      "lanai"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/surf": {
+      "get": {
+        "operationId": "get_surf",
+        "summary": "Get Hawaii surf conditions",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.1,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "island",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "oahu",
+                "maui",
+                "kauai",
+                "big-island",
+                "molokai",
+                "lanai"
+              ],
+              "default": "oahu"
+            }
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_surf",
+        "summary": "Get Hawaii surf conditions (POST)",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.1,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "island": {
+                    "type": "string",
+                    "enum": [
+                      "oahu",
+                      "maui",
+                      "kauai",
+                      "big-island",
+                      "molokai",
+                      "lanai"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/volcano": {
+      "get": {
+        "operationId": "get_volcano",
+        "summary": "Get Hawaii volcanic activity status",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.25,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "x-input-schema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      },
+      "post": {
+        "operationId": "post_volcano",
+        "summary": "Get Hawaii volcanic activity status (POST)",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.25,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              }
+            }
+          }
+        },
+        "x-input-schema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      }
+    },
+    "/gpt/trails": {
+      "get": {
+        "operationId": "get_trails",
+        "summary": "Get Hawaii trail conditions",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.25,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "island",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "oahu",
+                "maui",
+                "kauai",
+                "big-island",
+                "molokai",
+                "lanai"
+              ],
+              "default": "oahu"
+            }
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_trails",
+        "summary": "Get Hawaii trail conditions (POST)",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.25,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "island": {
+                    "type": "string",
+                    "enum": [
+                      "oahu",
+                      "maui",
+                      "kauai",
+                      "big-island",
+                      "molokai",
+                      "lanai"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/ocean-safety": {
+      "get": {
+        "operationId": "get_ocean_safety",
+        "summary": "Get Hawaii ocean safety conditions",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.5,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "island",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "oahu",
+                "maui",
+                "kauai",
+                "big-island",
+                "molokai",
+                "lanai"
+              ],
+              "default": "oahu"
+            }
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_ocean_safety",
+        "summary": "Get Hawaii ocean safety conditions (POST)",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.5,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "island": {
+                    "type": "string",
+                    "enum": [
+                      "oahu",
+                      "maui",
+                      "kauai",
+                      "big-island",
+                      "molokai",
+                      "lanai"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/sun-times": {
+      "get": {
+        "operationId": "get_sun_times",
+        "summary": "Get Hawaii sunrise and sunset times — Free",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "free"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "island",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "oahu",
+                "maui",
+                "kauai",
+                "big-island",
+                "molokai",
+                "lanai"
+              ],
+              "default": "oahu"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_sun_times",
+        "summary": "Get Hawaii sunrise and sunset times (POST) — Free",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "free"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "island": {
+                    "type": "string",
+                    "enum": [
+                      "oahu",
+                      "maui",
+                      "kauai",
+                      "big-island",
+                      "molokai",
+                      "lanai"
+                    ]
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/moon-phase": {
+      "get": {
+        "operationId": "get_moon_phase",
+        "summary": "Get Hawaii moon phase — Free",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "free"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "island",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "oahu",
+                "maui",
+                "kauai",
+                "big-island",
+                "molokai",
+                "lanai"
+              ],
+              "default": "oahu"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_moon_phase",
+        "summary": "Get Hawaii moon phase (POST) — Free",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "free"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "island": {
+                    "type": "string",
+                    "enum": [
+                      "oahu",
+                      "maui",
+                      "kauai",
+                      "big-island",
+                      "molokai",
+                      "lanai"
+                    ]
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/briefing": {
+      "get": {
+        "operationId": "get_briefing",
+        "summary": "Get full Hawaii conditions briefing",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 2,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "island",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "oahu",
+                "maui",
+                "kauai",
+                "big-island",
+                "molokai",
+                "lanai"
+              ],
+              "default": "oahu"
+            }
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_briefing",
+        "summary": "Get full Hawaii conditions briefing (POST)",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 2,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "island": {
+                    "type": "string",
+                    "enum": [
+                      "oahu",
+                      "maui",
+                      "kauai",
+                      "big-island",
+                      "molokai",
+                      "lanai"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/restaurants": {
+      "get": {
+        "operationId": "get_restaurants",
+        "summary": "Search Hawaii restaurants",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.25,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cuisine",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "$",
+                "$$",
+                "$$$",
+                "$$$$"
+              ]
+            }
+          },
+          {
+            "name": "open_now",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_restaurants",
+        "summary": "Search Hawaii restaurants (POST)",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.25,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "location"
+                ],
+                "properties": {
+                  "location": {
+                    "type": "string"
+                  },
+                  "cuisine": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "string"
+                  },
+                  "open_now": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gpt/restaurant": {
+      "get": {
+        "operationId": "get_restaurant",
+        "summary": "Get details for a specific Hawaii restaurant",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.15,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          },
+          {
+            "name": "place_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_restaurant",
+        "summary": "Get details for a specific Hawaii restaurant (POST)",
+        "tags": [
+          "Hawaii Conditions"
+        ],
+        "x-payment-info": {
+          "price": 0.15,
+          "currency": "USD",
+          "protocols": [
+            "stripe-card-prepaid"
+          ],
+          "protocol": "stripe-card-prepaid",
+          "pricingMode": "fixed",
+          "billing": "prepaid_balance",
+          "accountHeader": "X-MCP-Account"
+        },
+        "parameters": [
+          {
+            "name": "X-MCP-Account",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^mcp_live_"
+            },
+            "description": "Your prepaid API key (format: mcp_live_…). Register via register_agent."
+          }
+        ],
+        "security": [
+          {
+            "McpPrepaidAccount": []
+          },
+          {
+            "MppPayment": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "402": {
+            "description": "Payment required"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "place_id"
+                ],
+                "properties": {
+                  "place_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "McpPrepaidAccount": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-MCP-Account",
+        "description": "Prepaid account key (format: mcp_live_…). Register via register_agent at https://hawaii-conditions.vercel.app/mcp"
+      },
+      "MppPayment": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "MPP",
+        "description": "MPP payment credential issued after a 402 challenge."
+      }
+    }
+  }
+}
