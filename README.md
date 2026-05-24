@@ -181,7 +181,9 @@
   | `SERVER_URL` | Yes | Your Vercel URL, no trailing slash |
   | `X402_PAY_TO` | No | EVM wallet address that receives x402 USDC payments. Setting this enables the on-chain x402 rail. |
   | `X402_NETWORK` | No | `base` (mainnet) or `base-sepolia` (testnet, default) |
-  | `X402_FACILITATOR_URL` | No | x402 facilitator base URL (default `https://x402.org/facilitator`) |
+  | `CDP_API_KEY_ID` | For mainnet | Coinbase Developer Platform API key ID — required to settle on Base mainnet |
+  | `CDP_API_KEY_SECRET` | For mainnet | CDP API key secret (PEM EC or base64 Ed25519) |
+  | `X402_FACILITATOR_URL` | No | Override the facilitator base URL (defaults: CDP when keys present, else `https://x402.org/facilitator`) |
 
   3. Push to `main`. Vercel auto-deploys.
 
@@ -200,6 +202,14 @@
   - Discovery / resource catalog: `GET /api/x402`
   - Per-tool payable resource: `GET|POST /api/x402?tool=<name>`
   - MCP endpoint (`POST /api/mcp`) also accepts the `X-PAYMENT` header on paid `tools/call`.
+
+  **Testnet vs mainnet:** on `base-sepolia` the public `x402.org` facilitator
+  settles for free. On `base` (mainnet, real USDC) settlement runs through the
+  authenticated Coinbase **CDP facilitator** — create an API key at the Coinbase
+  Developer Platform and set `CDP_API_KEY_ID` / `CDP_API_KEY_SECRET`. The
+  `GET /api/x402` catalog reports `facilitatorMode` and `settlementReady` so you
+  can confirm mainnet is fully wired (`settlementReady` is `false` on mainnet
+  until the CDP keys are present).
 
   ---
 

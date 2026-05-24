@@ -19,12 +19,32 @@ const USDC: Record<X402Network, { address: string; name: string; version: string
 
 const USDC_DECIMALS = 6;
 
+import { createCdpAuthHeaders } from "@coinbase/x402";
+
 export const X402_VERSION = 1;
 export const X402_NETWORK = ((process.env.X402_NETWORK as X402Network) || "base-sepolia") as X402Network;
 export const X402_PAY_TO = process.env.X402_PAY_TO ?? "";
-export const X402_FACILITATOR_URL = (process.env.X402_FACILITATOR_URL ?? "https://x402.org/facilitator").replace(/\/+$/, "");
 // x402 is advertised/accepted only once a recipient wallet is configured.
 export const X402_ENABLED = X402_PAY_TO.length > 0;
+
+// Facilitator selection:
+//   1. An explicit X402_FACILITATOR_URL always wins (no auth attached).
+//   2. Otherwise, when CDP API keys are present, settle through Coinbase's
+//      authenticated CDP facilitator — required for Base mainnet.
+//   3. Otherwise fall back to the public testnet facilitator (Base Sepolia).
+const CDP_API_KEY_ID = process.env.CDP_API_KEY_ID ?? "";
+const CDP_API_KEY_SECRET = process.env.CDP_API_KEY_SECRET ?? "";
+const CDP_FACILITATOR_URL = "https://api.cdp.coinbase.com/platform/v2/x402";
+const FACILITATOR_OVERRIDE = process.env.X402_FACILITATOR_URL?.replace(/\/+$/, "");
+const CDP_KEYS_PRESENT = CDP_API_KEY_ID.length > 0 && CDP_API_KEY_SECRET.length > 0;
+
+const USE_CDP = !FACILITATOR_OVERRIDE && CDP_KEYS_PRESENT;
+export const X402_FACILITATOR_URL = FACILITATOR_OVERRIDE ?? (USE_CDP ? CDP_FACILITATOR_URL : "https://x402.org/facilitator");
+
+// Generates fresh, request-bound CDP auth headers (Bearer JWT + correlation) per call.
+const cdpAuthHeaders = USE_CDP ? createCdpAuthHeaders(CDP_API_KEY_ID, CDP_API_KEY_SECRET) : undefined;
+// Base mainnet can only settle through the authenticated CDP facilitator.
+const SETTLEMENT_READY = X402_NETWORK === "base" ? USE_CDP : true;
 
 export interface PaymentRequirements {
   scheme: "exact";
@@ -97,21 +117,26 @@ export function encodeSettlementHeader(settle: SettleResult): string {
   return Buffer.from(JSON.stringify(settle), "utf8").toString("base64");
 }
 
-async function facilitatorPost<T>(path: string, payload: unknown): Promise<T> {
-  const res = await fetch(`${X402_FACILITATOR_URL}${path}`, {
+async function facilitatorPost<T>(endpoint: "verify" | "settle", payload: unknown): Promise<T> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (cdpAuthHeaders) {
+    const authed = await cdpAuthHeaders();
+    Object.assign(headers, authed[endpoint]);
+  }
+  const res = await fetch(`${X402_FACILITATOR_URL}/${endpoint}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    throw new Error(`x402 facilitator ${path} returned ${res.status}: ${detail}`);
+    throw new Error(`x402 facilitator /${endpoint} returned ${res.status}: ${detail}`);
   }
   return (await res.json()) as T;
 }
 
 export function verifyPayment(paymentPayload: unknown, requirements: PaymentRequirements): Promise<VerifyResult> {
-  return facilitatorPost<VerifyResult>("/verify", {
+  return facilitatorPost<VerifyResult>("verify", {
     x402Version: X402_VERSION,
     paymentPayload,
     paymentRequirements: requirements,
@@ -119,7 +144,7 @@ export function verifyPayment(paymentPayload: unknown, requirements: PaymentRequ
 }
 
 export function settlePayment(paymentPayload: unknown, requirements: PaymentRequirements): Promise<SettleResult> {
-  return facilitatorPost<SettleResult>("/settle", {
+  return facilitatorPost<SettleResult>("settle", {
     x402Version: X402_VERSION,
     paymentPayload,
     paymentRequirements: requirements,
@@ -183,5 +208,8 @@ export function facilitatorInfo() {
     asset: USDC[X402_NETWORK].address,
     assetName: USDC[X402_NETWORK].name,
     facilitator: X402_FACILITATOR_URL,
+    facilitatorMode: USE_CDP ? "cdp" : "public",
+    // false on Base mainnet until CDP API keys are configured (settlement would fail).
+    settlementReady: SETTLEMENT_READY,
   };
 }

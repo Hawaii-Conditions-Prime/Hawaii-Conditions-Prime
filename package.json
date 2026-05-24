@@ -14,6 +14,7 @@
     "mpp:scan": "npx -y @agentcash/discovery@latest discover \"https://hawaii-conditions.vercel.app\""
   },
   "dependencies": {
+    "@coinbase/x402": "^2.1.0",
     "@modelcontextprotocol/sdk": "^1.12.0",
     "@neondatabase/serverless": "^0.10.4",
     "next": "^15.3.0",
