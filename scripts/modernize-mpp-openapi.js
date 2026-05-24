@@ -14,9 +14,9 @@
 const fs   = require("fs");
 const path = require("path");
 
-const SOURCE_URL = process.env.OPENAPI_URL || "https://hawaii-conditions.vercel.app/openapi.json";
+const SOURCE_URL = process.env.OPENAPI_URL || "https://hawaii-conditions-prime.vercel.app/openapi.json";
 const OUT_FILE   = path.resolve(__dirname, "../public/openapi.json");
-const SERVER_URL = process.env.SERVER_URL  || "https://hawaii-conditions.vercel.app";
+const SERVER_URL = process.env.SERVER_URL  || "https://hawaii-conditions-prime.vercel.app";
 
 /**
  * Normalises a single x-payment-info object so it always has both

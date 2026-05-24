@@ -10,7 +10,7 @@ export async function GET() {
       server: "HawaiiConditions",
       version: "1.0.0",
       timestamp: new Date().toISOString(),
-      endpoint: `${process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app"}/mcp`,
+      endpoint: `${process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app"}/mcp`,
       transport: "streamable-http",
     },
     {

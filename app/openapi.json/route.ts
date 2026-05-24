@@ -4,7 +4,7 @@ import { toRequestBody, sharedAuthHeader, inputSchema } from "@/lib/tool-schemas
 export async function GET() {
   const paymentLink = process.env.STRIPE_PAYMENT_LINK ?? "";
   const toolName = process.env.MCP_TOOL_NAME ?? "HawaiiConditions";
-  const rawServerUrl = process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app";
+  const rawServerUrl = process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app";
   const serverUrl = rawServerUrl.replace(/\/+$/, "");
   const hostname = new URL(serverUrl).hostname;
 

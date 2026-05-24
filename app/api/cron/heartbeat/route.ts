@@ -17,8 +17,8 @@ export async function GET(req: NextRequest) {
   try {
     const heartbeat = new RegistryHeartbeat({
       serverName: "hawaii-conditions",
-      serverUrl: "https://hawaii-conditions.vercel.app/mcp",
-      healthCheckUrl: "https://hawaii-conditions.vercel.app/health",
+      serverUrl: "https://hawaii-conditions-prime.vercel.app/mcp",
+      healthCheckUrl: "https://hawaii-conditions-prime.vercel.app/health",
       heartbeatInterval: "CONSERVATIVE",
       capabilities: [
         "get_weather",

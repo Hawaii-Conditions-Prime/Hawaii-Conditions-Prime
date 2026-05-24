@@ -12,5 +12,5 @@
 - Published via `.github/workflows/publish-mcp.yml` using GitHub OIDC auth (`login github-oidc`)
 - Trigger: push a `v*` tag, or use **Actions → Run workflow** selecting the correct branch
 - `server.json` description must be ≤ 100 characters
-- Transport URL: `https://hawaii-conditions.vercel.app/api/mcp` (not `/mcp`)
+- Transport URL: `https://hawaii-conditions-prime.vercel.app/api/mcp` (not `/mcp`)
 - Remote servers use the `remotes` array in `server.json`, not `packages`

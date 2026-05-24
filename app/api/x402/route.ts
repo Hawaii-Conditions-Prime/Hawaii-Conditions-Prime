@@ -11,7 +11,7 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const SERVER_URL = (process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app").replace(/\/+$/, "");
+const SERVER_URL = (process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app").replace(/\/+$/, "");
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",

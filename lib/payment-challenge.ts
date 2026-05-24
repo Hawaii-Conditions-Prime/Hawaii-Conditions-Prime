@@ -5,10 +5,10 @@ import {
   type PaymentRequirements,
 } from "./x402";
 
-const PAYMENT_REALM = process.env.PAYMENT_REALM ?? "hawaii-conditions.vercel.app";
+const PAYMENT_REALM = process.env.PAYMENT_REALM ?? "hawaii-conditions-prime.vercel.app";
 const PAYMENT_RECIPIENT = process.env.PAYMENT_RECIPIENT ?? process.env.STRIPE_ACCOUNT_ID ?? "stripe-card-prepaid";
 const CHALLENGE_TTL_SECONDS = Number(process.env.PAYMENT_CHALLENGE_TTL_SECONDS ?? 300);
-const SERVER_URL = (process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app").replace(/\/+$/, "");
+const SERVER_URL = (process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app").replace(/\/+$/, "");
 
 export const TOOL_PRICES: Record<string, number> = {
   get_weather:            0.10,

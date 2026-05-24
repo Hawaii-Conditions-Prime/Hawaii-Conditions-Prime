@@ -24,7 +24,7 @@
   ## 🌐 MCP Endpoint
 
   ```
-  https://hawaii-conditions.vercel.app/mcp
+  https://hawaii-conditions-prime.vercel.app/mcp
   ```
 
   ---
@@ -118,24 +118,24 @@
 
   ```bash
   # 1. Register (one time)
-  curl -X POST https://hawaii-conditions.vercel.app/mcp \
+  curl -X POST https://hawaii-conditions-prime.vercel.app/mcp \
     -H "Content-Type: application/json" \
     -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"register_agent","arguments":{"display_name":"My Travel Agent"}}}'
 
   # 2. Save a card (test mode: pm_card_visa)
-  curl -X POST https://hawaii-conditions.vercel.app/mcp \
+  curl -X POST https://hawaii-conditions-prime.vercel.app/mcp \
     -H "Content-Type: application/json" \
     -H "X-MCP-Account: mcp_live_xxx" \
     -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"save_payment_method","arguments":{"payment_method_id":"pm_card_visa"}}}'
 
   # 3. Top up (card auto-charged, balance credited immediately)
-  curl -X POST https://hawaii-conditions.vercel.app/mcp \
+  curl -X POST https://hawaii-conditions-prime.vercel.app/mcp \
     -H "Content-Type: application/json" \
     -H "X-MCP-Account: mcp_live_xxx" \
     -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"add_funds_5","arguments":{}}}'
 
   # 4. Call a paid tool
-  curl -X POST https://hawaii-conditions.vercel.app/mcp \
+  curl -X POST https://hawaii-conditions-prime.vercel.app/mcp \
     -H "Content-Type: application/json" \
     -H "X-MCP-Account: mcp_live_xxx" \
     -d '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"get_surf_conditions","arguments":{"island":"oahu"}}}'
@@ -158,10 +158,10 @@
 
   | Resource | URL |
   |---|---|
-  | Server card | [/.well-known/mcp/server-card.json](https://hawaii-conditions.vercel.app/.well-known/mcp/server-card.json) |
-  | Agent card | [/.well-known/agent-card.json](https://hawaii-conditions.vercel.app/.well-known/agent-card.json) |
-  | LLM instructions | [/llms.txt](https://hawaii-conditions.vercel.app/llms.txt) |
-  | Health check | [/health](https://hawaii-conditions.vercel.app/health) |
+  | Server card | [/.well-known/mcp/server-card.json](https://hawaii-conditions-prime.vercel.app/.well-known/mcp/server-card.json) |
+  | Agent card | [/.well-known/agent-card.json](https://hawaii-conditions-prime.vercel.app/.well-known/agent-card.json) |
+  | LLM instructions | [/llms.txt](https://hawaii-conditions-prime.vercel.app/llms.txt) |
+  | Health check | [/health](https://hawaii-conditions-prime.vercel.app/health) |
 
   ---
 

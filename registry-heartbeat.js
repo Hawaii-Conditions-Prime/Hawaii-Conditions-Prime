@@ -14,8 +14,8 @@ class RegistryHeartbeat {
   constructor(config = {}) {
     // Server configuration
     this.serverName = config.serverName || 'hawaii-conditions';
-    this.serverUrl = config.serverUrl || 'https://hawaii-conditions.vercel.app/mcp';
-    this.healthCheckUrl = config.healthCheckUrl || 'https://hawaii-conditions.vercel.app/health';
+    this.serverUrl = config.serverUrl || 'https://hawaii-conditions-prime.vercel.app/mcp';
+    this.healthCheckUrl = config.healthCheckUrl || 'https://hawaii-conditions-prime.vercel.app/health';
     this.version = config.version || '1.0.0';
     this.capabilities = config.capabilities || [
       'get_weather',

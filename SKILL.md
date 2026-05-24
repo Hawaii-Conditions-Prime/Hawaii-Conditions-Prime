@@ -5,7 +5,7 @@
   ## MCP Endpoint
 
   ```
-  https://hawaii-conditions.vercel.app/mcp
+  https://hawaii-conditions-prime.vercel.app/mcp
   ```
 
   Streamable HTTP transport. Stateless — every request is self-contained.
@@ -93,7 +93,7 @@
 
   ```javascript
   // Step 1 — Register
-  const reg = await fetch("https://hawaii-conditions.vercel.app/mcp", {
+  const reg = await fetch("https://hawaii-conditions-prime.vercel.app/mcp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -105,7 +105,7 @@
   const { api_key } = await reg.json(); // store this permanently
 
   // Step 2 — Call a data tool
-  const weather = await fetch("https://hawaii-conditions.vercel.app/mcp", {
+  const weather = await fetch("https://hawaii-conditions-prime.vercel.app/mcp", {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-MCP-Account": api_key },
     body: JSON.stringify({

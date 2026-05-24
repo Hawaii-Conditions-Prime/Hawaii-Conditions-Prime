@@ -1401,7 +1401,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-MCP-Account",
-        "description": "Prepaid account key (format: mcp_live_…). Register via register_agent at https://hawaii-conditions.vercel.app/mcp"
+        "description": "Prepaid account key (format: mcp_live_…). Register via register_agent at https://hawaii-conditions-prime.vercel.app/mcp"
       },
       "MppPayment": {
         "type": "http",

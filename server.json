@@ -4,7 +4,7 @@
   "title": "Hawaii Conditions MCP Server",
   "description": "Real-time surf, weather, trail status, volcano, ocean safety, and restaurants for Hawaii.",
   "version": "1.0.5",
-  "websiteUrl": "https://hawaii-conditions.vercel.app",
+  "websiteUrl": "https://hawaii-conditions-prime.vercel.app",
   "repository": {
     "url": "https://github.com/spacemandomains/2_hawaii_conditions_mcp_server",
     "source": "github"
@@ -12,7 +12,7 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://hawaii-conditions.vercel.app/api/mcp"
+      "url": "https://hawaii-conditions-prime.vercel.app/api/mcp"
     }
   ],
   "_meta": {
@@ -26,8 +26,8 @@
       "network": "base",
       "asset": "USDC",
       "paymentHeader": "X-PAYMENT",
-      "discovery": "https://hawaii-conditions.vercel.app/api/x402",
-      "resource": "https://hawaii-conditions.vercel.app/api/mcp",
+      "discovery": "https://hawaii-conditions-prime.vercel.app/api/x402",
+      "resource": "https://hawaii-conditions-prime.vercel.app/api/mcp",
       "description": "Paid tools accept on-chain USDC via x402. Send a 402-challenged request, then resend with an X-PAYMENT header. No account required."
     }
   },

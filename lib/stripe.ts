@@ -108,8 +108,8 @@ export async function createPaymentChallenge(opts: {
       caller_id: opts.callerId ?? "",
       payment_intent_id: paymentIntent.id,
     },
-    success_url: `${process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app"}/payment/success`,
-    cancel_url: `${process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app"}/payment/cancel`,
+    success_url: `${process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app"}/payment/success`,
+    cancel_url: `${process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app"}/payment/cancel`,
   });
 
   return { paymentIntent, checkoutSession };

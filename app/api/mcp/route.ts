@@ -22,7 +22,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const SERVER_URL = process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app";
+const SERVER_URL = process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app";
 const PAYMENT_PROTOCOLS = X402_ENABLED ? ["x402", "stripe-card-prepaid"] : ["stripe-card-prepaid"];
 
 const TOOL_COSTS: Record<string, number> = {

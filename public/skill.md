@@ -5,7 +5,7 @@ Use this skill when an AI agent needs real-time Hawaiian island data or wants to
 ## MCP Endpoint
 
 ```
-https://hawaii-conditions.vercel.app/mcp
+https://hawaii-conditions-prime.vercel.app/mcp
 ```
 
 Streamable HTTP transport. Stateless — every request is self-contained.

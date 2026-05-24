@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
   (function() {
       if (!('modelContext' in navigator)) return;
       try {
-          const MCP_ENDPOINT = 'https://hawaii-conditions.vercel.app/mcp';
+          const MCP_ENDPOINT = 'https://hawaii-conditions-prime.vercel.app/mcp';
 
           async function mcpCall(tool, args, apiKey) {
               const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream' };

@@ -11,7 +11,7 @@
     "start": "next start",
     "type-check": "tsc --noEmit",
     "db:migrate": "psql $DATABASE_URL -f scripts/db-migrate.sql",
-    "mpp:scan": "npx -y @agentcash/discovery@latest discover \"https://hawaii-conditions.vercel.app\""
+    "mpp:scan": "npx -y @agentcash/discovery@latest discover \"https://hawaii-conditions-prime.vercel.app\""
   },
   "dependencies": {
     "@coinbase/x402": "^2.1.0",
