@@ -1,6 +1,14 @@
+import {
+  X402_ENABLED,
+  buildPaymentRequirements,
+  facilitatorInfo,
+  type PaymentRequirements,
+} from "./x402";
+
 const PAYMENT_REALM = process.env.PAYMENT_REALM ?? "hawaii-conditions.vercel.app";
 const PAYMENT_RECIPIENT = process.env.PAYMENT_RECIPIENT ?? process.env.STRIPE_ACCOUNT_ID ?? "stripe-card-prepaid";
 const CHALLENGE_TTL_SECONDS = Number(process.env.PAYMENT_CHALLENGE_TTL_SECONDS ?? 300);
+const SERVER_URL = (process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app").replace(/\/+$/, "");
 
 export const TOOL_PRICES: Record<string, number> = {
   get_weather:            0.10,
@@ -17,6 +25,8 @@ export type PaymentChallengeOptions = {
   toolName?: string;
   amountCents?: number;
   inputSchema?: Record<string, unknown>;
+  description?: string;
+  resourceUrl?: string;
 };
 
 function base64url(value: unknown): string {
@@ -53,20 +63,34 @@ function challengeFor(toolName: string, amountCents: number) {
 
 export function paymentHeaders(toolName = "paid_tool", amountCents = 10): Record<string, string> {
   const challenge = challengeFor(toolName, amountCents);
+  const protocols = X402_ENABLED ? ["x402", "stripe-card-prepaid"] : ["stripe-card-prepaid"];
 
   return {
     "WWW-Authenticate": `Payment method="stripe-card-prepaid" intent="fund" realm="${PAYMENT_REALM}" id="${challenge.id}" expires="${challenge.expires}" request="${challenge.request}"`,
     "Content-Type": "application/json",
     "X-Payment-Provider": "stripe",
-    "X-Payment-Protocol": "stripe-card-prepaid",
+    "X-Payment-Protocol": protocols.join(","),
+    ...(X402_ENABLED ? { "X-Accept-Payment": "x402" } : {}),
     "X-Payment-Info": JSON.stringify({
       price: (amountCents / 100).toFixed(2),
       currency: "USD",
-      protocols: ["stripe-card-prepaid"],
-      billing: "prepaid_balance",
+      protocols,
+      billing: X402_ENABLED ? "x402_or_prepaid_balance" : "prepaid_balance",
       accountHeader: "X-MCP-Account",
+      x402: X402_ENABLED ? facilitatorInfo() : undefined,
     }),
   };
+}
+
+function x402RequirementsFor(toolName: string, costUsd: number, resourceUrl?: string, description?: string): PaymentRequirements[] {
+  if (!X402_ENABLED) return [];
+  return [
+    buildPaymentRequirements({
+      priceUsd: costUsd,
+      resource: resourceUrl ?? `${SERVER_URL}/api/mcp`,
+      description: description ?? `Hawaii Conditions tool: ${toolName} ($${costUsd.toFixed(2)} per call).`,
+    }),
+  ];
 }
 
 // Accepts either the new options object or a legacy URL string for older route compatibility.
@@ -75,27 +99,40 @@ export function paymentRequiredResponse(opts: string | PaymentChallengeOptions =
     toolName = "paid_tool",
     amountCents,
     inputSchema,
+    description,
+    resourceUrl,
   } = typeof opts === "string" ? {} : opts;
 
   const resolvedAmountCents = amountCents ?? Math.round((TOOL_PRICES[toolName] ?? 0.10) * 100);
   const challenge = challengeFor(toolName, resolvedAmountCents);
   const costUsd = resolvedAmountCents / 100;
   const costStr = `$${costUsd.toFixed(2)}`;
+  const x402Accepts = x402RequirementsFor(toolName, costUsd, resourceUrl, description);
 
   const body = {
     error: "payment_required",
-    message: `This tool requires a prepaid balance. Cost per call: ${costStr}.`,
+    message: `This tool requires payment. Cost per call: ${costStr}. Pay on-chain via x402 (X-PAYMENT header) or top up a prepaid balance.`,
+    // x402 protocol fields — make this a valid x402 402 response for agentic marketplaces.
+    ...(x402Accepts.length ? { x402Version: 1, accepts: x402Accepts } : {}),
     payment_options: [challenge],
     challenges: [challenge],
     input_schema: inputSchema ?? { type: "object", properties: {}, required: [] },
+    ...(x402Accepts.length
+      ? {
+          x402: {
+            ...facilitatorInfo(),
+            instructions: "Sign an `exact`-scheme USDC payment for the amount in `accepts[0].maxAmountRequired`, base64-encode it, and resend the request with an `X-PAYMENT` header. Settlement is returned in `X-PAYMENT-RESPONSE`. No account or registration required.",
+          },
+        }
+      : {}),
     payment: {
-      model: "prepaid_ledger",
+      model: X402_ENABLED ? "x402_or_prepaid_ledger" : "prepaid_ledger",
       provider: "stripe",
       payment_method: "card",
       currency: "USD",
       cost_per_call_usd: costStr,
       cost_per_call_cents: resolvedAmountCents,
-      protocol: "stripe-card-prepaid",
+      protocol: X402_ENABLED ? "x402,stripe-card-prepaid" : "stripe-card-prepaid",
       challenge_id: challenge.id,
       expires: challenge.expires,
       request: challenge.request,

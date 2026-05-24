@@ -11,13 +11,19 @@ import {
   registerAgent,
   toBalanceResponse,
 } from "@/lib/ledger";
+import {
+  X402_ENABLED,
+  buildPaymentRequirements,
+  facilitatorInfo,
+  settleFromHeader,
+} from "@/lib/x402";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const SERVER_URL = process.env.SERVER_URL ?? "https://hawaii-conditions.vercel.app";
-const PAYMENT_PROTOCOLS = ["stripe-card-prepaid"];
+const PAYMENT_PROTOCOLS = X402_ENABLED ? ["x402", "stripe-card-prepaid"] : ["stripe-card-prepaid"];
 
 const TOOL_COSTS: Record<string, number> = {
   ping: 0,
@@ -101,6 +107,7 @@ const MCP_GET_PAYMENT_INFO = {
   currency: "USD",
   protocols: PAYMENT_PROTOCOLS,
   billing: "free",
+  ...(X402_ENABLED ? { x402: facilitatorInfo() } : {}),
 };
 
 const MCP_POST_PAYMENT_INFO = {
@@ -109,14 +116,17 @@ const MCP_POST_PAYMENT_INFO = {
   maxPrice: 2,
   currency: "USD",
   protocols: PAYMENT_PROTOCOLS,
-  billing: "mixed_prepaid_balance",
+  billing: X402_ENABLED ? "x402_or_prepaid_balance" : "mixed_prepaid_balance",
   accountHeader: "X-MCP-Account",
+  paymentHeader: X402_ENABLED ? "X-PAYMENT" : undefined,
+  ...(X402_ENABLED ? { x402: facilitatorInfo() } : {}),
 };
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-MCP-Account, MCP-Session-Id",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-MCP-Account, MCP-Session-Id, X-PAYMENT",
+  "Access-Control-Expose-Headers": "X-PAYMENT-RESPONSE, X-Payment-Info, X-Payment-Protocols, X-Payment-Price",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -128,12 +138,13 @@ function paymentMetadataHeaders(info: Record<string, unknown>) {
   };
 }
 
-function json(data: unknown, status = 200, paymentInfo?: Record<string, unknown>) {
+function json(data: unknown, status = 200, paymentInfo?: Record<string, unknown>, extraHeaders?: Record<string, string>) {
   return NextResponse.json(data, {
     status,
     headers: {
       ...CORS_HEADERS,
       ...(paymentInfo ? paymentMetadataHeaders(paymentInfo) : {}),
+      ...(extraHeaders ?? {}),
     },
   });
 }
@@ -199,29 +210,51 @@ export async function POST(req: NextRequest) {
 
     const cost = TOOL_COSTS[toolName];
     const auth = getAuth(req, args);
+    let settlementHeader: string | undefined;
 
     if (cost > 0) {
-      if (!auth) {
-        return paymentRequiredResponse({ toolName, amountCents: cost, inputSchema: TOOL_INPUT_SCHEMAS[toolName] });
-      }
+      const paymentHeader = req.headers.get("X-PAYMENT");
 
-      if (!(await isValidToken(auth))) {
-        return json({ jsonrpc: "2.0", id, error: { code: -32001, message: "Unauthorized: invalid API key. Call register_agent to create a free account." } }, 401, MCP_POST_PAYMENT_INFO);
-      }
+      // Rail 1: on-chain x402 payment (no account required).
+      if (X402_ENABLED && paymentHeader) {
+        const outcome = await settleFromHeader({
+          paymentHeader,
+          requirements: buildPaymentRequirements({
+            priceUsd: cost / 100,
+            resource: `${SERVER_URL}/api/mcp`,
+            description: `Hawaii Conditions tool: ${toolName} ($${(cost / 100).toFixed(2)} per call).`,
+            outputSchema: TOOL_INPUT_SCHEMAS[toolName],
+          }),
+        });
 
-      try {
-        await deductBalance(auth, cost, toolName);
-      } catch (error) {
-        if (error instanceof Error && error.message === "insufficient_balance") {
+        if (!outcome.paid) {
+          return json(outcome.body, 402, MCP_POST_PAYMENT_INFO);
+        }
+        settlementHeader = outcome.settlementHeader;
+      } else {
+        // Rail 2: prepaid Stripe balance (X-MCP-Account / api_key).
+        if (!auth) {
           return paymentRequiredResponse({ toolName, amountCents: cost, inputSchema: TOOL_INPUT_SCHEMAS[toolName] });
         }
 
-        return json({ jsonrpc: "2.0", id, error: { code: -32000, message: "Billing error while deducting prepaid balance." } }, 500, MCP_POST_PAYMENT_INFO);
+        if (!(await isValidToken(auth))) {
+          return json({ jsonrpc: "2.0", id, error: { code: -32001, message: "Unauthorized: invalid API key. Pay on-chain via the X-PAYMENT (x402) header, or call register_agent to create a free prepaid account." } }, 401, MCP_POST_PAYMENT_INFO);
+        }
+
+        try {
+          await deductBalance(auth, cost, toolName);
+        } catch (error) {
+          if (error instanceof Error && error.message === "insufficient_balance") {
+            return paymentRequiredResponse({ toolName, amountCents: cost, inputSchema: TOOL_INPUT_SCHEMAS[toolName] });
+          }
+
+          return json({ jsonrpc: "2.0", id, error: { code: -32000, message: "Billing error while deducting prepaid balance." } }, 500, MCP_POST_PAYMENT_INFO);
+        }
       }
     }
 
     const result = await callTool(toolName, args, auth);
-    return json({ jsonrpc: "2.0", id, result }, 200, MCP_POST_PAYMENT_INFO);
+    return json({ jsonrpc: "2.0", id, result }, 200, MCP_POST_PAYMENT_INFO, settlementHeader ? { "X-PAYMENT-RESPONSE": settlementHeader } : undefined);
   }
 
   return json({ jsonrpc: "2.0", id, error: { code: -32601, message: `Unsupported method: ${method}` } }, 200, MCP_POST_PAYMENT_INFO);
