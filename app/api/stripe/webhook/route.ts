@@ -1,8 +1,6 @@
 import { stripe } from "@/lib/stripe";
 import { creditBalance } from "@/lib/ledger";
-import { neon } from "@neondatabase/serverless";
-
-const sql = neon(process.env.DATABASE_URL!);
+import sql from "@/lib/db";
 
 export async function POST(req: Request) {
   const body = await req.text();

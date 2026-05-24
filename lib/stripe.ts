@@ -1,8 +1,24 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
-});
+// Constructed lazily so importing this module never throws when
+// STRIPE_SECRET_KEY is absent (e.g. during `next build` page-data collection).
+// The real client is created on first property access, at request time.
+let _stripe: Stripe | null = null;
+function client(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error("STRIPE_SECRET_KEY is not set");
+    _stripe = new Stripe(key, { apiVersion: "2025-02-24.acacia" });
+  }
+  return _stripe;
+}
+
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop, receiver) {
+    const value = Reflect.get(client() as object, prop, receiver);
+    return typeof value === "function" ? value.bind(client()) : value;
+  },
+}) as Stripe;
 
 export async function createStripeCustomer(opts: {
   displayName?: string;

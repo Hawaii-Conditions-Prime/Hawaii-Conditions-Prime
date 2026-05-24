@@ -1,10 +1,9 @@
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { randomUUID } from "crypto";
 import { addToken } from "@/lib/token-store";
+import { stripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
   const body = await req.text();
