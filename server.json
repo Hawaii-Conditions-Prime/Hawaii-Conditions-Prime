@@ -15,6 +15,22 @@
       "url": "https://hawaii-conditions.vercel.app/api/mcp"
     }
   ],
+  "_meta": {
+    "payment": {
+      "protocols": ["x402", "stripe-card-prepaid"],
+      "currency": "USD"
+    },
+    "x402": {
+      "version": 1,
+      "scheme": "exact",
+      "network": "base",
+      "asset": "USDC",
+      "paymentHeader": "X-PAYMENT",
+      "discovery": "https://hawaii-conditions.vercel.app/api/x402",
+      "resource": "https://hawaii-conditions.vercel.app/api/mcp",
+      "description": "Paid tools accept on-chain USDC via x402. Send a 402-challenged request, then resend with an X-PAYMENT header. No account required."
+    }
+  },
   "tools": [
     {
       "name": "ping",

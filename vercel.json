@@ -11,7 +11,18 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin",  "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-MCP-Account, MCP-Session-Id" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-MCP-Account, MCP-Session-Id, X-PAYMENT" },
+        { "key": "Access-Control-Expose-Headers", "value": "X-PAYMENT-RESPONSE, X-Payment-Info, X-Payment-Protocols, X-Payment-Price" },
+        { "key": "Access-Control-Max-Age",       "value": "86400" }
+      ]
+    },
+    {
+      "source": "/api/x402",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin",  "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, X-PAYMENT" },
+        { "key": "Access-Control-Expose-Headers", "value": "X-PAYMENT-RESPONSE" },
         { "key": "Access-Control-Max-Age",       "value": "86400" }
       ]
     },

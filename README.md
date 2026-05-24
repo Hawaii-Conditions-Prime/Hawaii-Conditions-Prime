@@ -179,8 +179,37 @@
   | `NPS_API_KEY` | Yes | Free at [nps.gov/subjects/developer](https://www.nps.gov/subjects/developer/get-started.htm) |
   | `GOOGLE_MAPS_API_KEY` | Yes | Required for restaurant tools |
   | `SERVER_URL` | Yes | Your Vercel URL, no trailing slash |
+  | `X402_PAY_TO` | No | EVM wallet address that receives x402 USDC payments. Setting this enables the on-chain x402 rail. |
+  | `X402_NETWORK` | No | `base` (mainnet) or `base-sepolia` (testnet, default) |
+  | `CDP_API_KEY_ID` | For mainnet | Coinbase Developer Platform API key ID — required to settle on Base mainnet |
+  | `CDP_API_KEY_SECRET` | For mainnet | CDP API key secret (PEM EC or base64 Ed25519) |
+  | `X402_FACILITATOR_URL` | No | Override the facilitator base URL (defaults: CDP when keys present, else `https://x402.org/facilitator`) |
 
   3. Push to `main`. Vercel auto-deploys.
+
+  ### 💳 Selling to agents via x402
+
+  Paid tools accept **two** payment rails. Agents can either top up a Stripe
+  prepaid balance (`X-MCP-Account`) **or** pay per-call on-chain with USDC using
+  the [x402](https://x402.org) protocol — no account or registration required.
+
+  Once `X402_PAY_TO` is set, every paid endpoint returns a standards-compliant
+  `402` with an `accepts` array; the agent resigns the request with an
+  `X-PAYMENT` header, which the server verifies and settles via the facilitator
+  and echoes back in `X-PAYMENT-RESPONSE`. This makes the API discoverable and
+  payable on agentic marketplaces (e.g. the Coinbase x402 Bazaar).
+
+  - Discovery / resource catalog: `GET /api/x402`
+  - Per-tool payable resource: `GET|POST /api/x402?tool=<name>`
+  - MCP endpoint (`POST /api/mcp`) also accepts the `X-PAYMENT` header on paid `tools/call`.
+
+  **Testnet vs mainnet:** on `base-sepolia` the public `x402.org` facilitator
+  settles for free. On `base` (mainnet, real USDC) settlement runs through the
+  authenticated Coinbase **CDP facilitator** — create an API key at the Coinbase
+  Developer Platform and set `CDP_API_KEY_ID` / `CDP_API_KEY_SECRET`. The
+  `GET /api/x402` catalog reports `facilitatorMode` and `settlementReady` so you
+  can confirm mainnet is fully wired (`settlementReady` is `false` on mainnet
+  until the CDP keys are present).
 
   ---
 
