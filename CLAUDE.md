@@ -8,7 +8,7 @@
 
 ## MCP Registry
 
-- Server name: `io.github.Spacemandomains/hawaii-conditions` (capital S — case-sensitive)
+- Server name: `io.github.Hawaii-Conditions-Prime/hawaii-conditions` (the `io.github.<owner>` namespace must match the GitHub org that runs the OIDC publish)
 - Published via `.github/workflows/publish-mcp.yml` using GitHub OIDC auth (`login github-oidc`)
 - Trigger: push a `v*` tag, or use **Actions → Run workflow** selecting the correct branch
 - `server.json` description must be ≤ 100 characters

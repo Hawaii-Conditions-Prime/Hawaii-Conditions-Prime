@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.Spacemandomains/hawaii-conditions",
+  "name": "io.github.Hawaii-Conditions-Prime/hawaii-conditions",
   "title": "Hawaii Conditions MCP Server",
   "description": "Real-time surf, weather, trail status, volcano, ocean safety, and restaurants for Hawaii.",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "websiteUrl": "https://hawaii-conditions-prime.vercel.app",
   "repository": {
     "url": "https://github.com/spacemandomains/2_hawaii_conditions_mcp_server",
