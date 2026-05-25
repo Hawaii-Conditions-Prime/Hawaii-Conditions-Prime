@@ -1,7 +1,7 @@
 # 🌺 Hawaii Conditions MCP Server
 
-  [![Add to Replit](https://replit.com/badge?caption=Add%20to%20Replit)](https://replit.com/integrations?mcp=eyJkaXNwbGF5TmFtZSI6Ikhhd2FpaSBDb25kaXRpb25zIE1DUCBTZXJ2ZXIiLCJiYXNlVXJsIjoiaHR0cHM6Ly9oYXdhaWktY29uZGl0aW9ucy52ZXJjZWwuYXBwL21jcCJ9)
-  [![Publish to MCP Registry](https://github.com/Spacemandomains/2_hawaii_conditions_mcp_server/actions/workflows/publish-mcp.yml/badge.svg)](https://github.com/Spacemandomains/2_hawaii_conditions_mcp_server/actions/workflows/publish-mcp.yml)
+  [![Add to Replit](https://replit.com/badge?caption=Add%20to%20Replit)](https://replit.com/integrations?mcp=eyJkaXNwbGF5TmFtZSI6Ikhhd2FpaSBDb25kaXRpb25zIE1DUCBTZXJ2ZXIiLCJiYXNlVXJsIjoiaHR0cHM6Ly9oYXdhaWktY29uZGl0aW9ucy1wcmltZS52ZXJjZWwuYXBwL2FwaS9tY3AifQ==)
+  [![Publish to MCP Registry](https://github.com/Hawaii-Conditions-Prime/Hawaii-Conditions-Prime/actions/workflows/publish-mcp.yml/badge.svg)](https://github.com/Hawaii-Conditions-Prime/Hawaii-Conditions-Prime/actions/workflows/publish-mcp.yml)
 
   Real-time surf conditions, trail status, volcano activity, ocean safety alerts, hyperlocal weather, and restaurant discovery for all Hawaiian islands — built for AI agents.
 
@@ -24,12 +24,25 @@
   ## 🌐 MCP Endpoint
 
   ```
-  https://hawaii-conditions-prime.vercel.app/mcp
+  https://hawaii-conditions-prime.vercel.app/api/mcp
   ```
+
+  Listed on the [MCP Registry](https://registry.modelcontextprotocol.io) as
+  **`io.github.Hawaii-Conditions-Prime/hawaii-conditions`** (streamable-http transport).
 
   ---
 
-  ## 💳 Payment — Autonomous Prepaid Balance
+  ## 💳 Payment
+
+  Paid tools accept **two** rails — agents pick whichever they support:
+
+  1. **x402 (on-chain USDC, no account)** — pay per call with a signed `X-PAYMENT`
+     header. Discoverable on agentic marketplaces (e.g. the Coinbase x402 Bazaar).
+     See [Selling to agents via x402](#-selling-to-agents-via-x402).
+  2. **Stripe prepaid balance** — register an account, save a card, and let the
+     agent top itself up autonomously (described below).
+
+  ### Autonomous Prepaid Balance
 
   Agents maintain a prepaid balance and can top it up entirely on their own — no human interaction required.
 
@@ -158,6 +171,7 @@
 
   | Resource | URL |
   |---|---|
+  | x402 catalog | [/api/x402](https://hawaii-conditions-prime.vercel.app/api/x402) |
   | Server card | [/.well-known/mcp/server-card.json](https://hawaii-conditions-prime.vercel.app/.well-known/mcp/server-card.json) |
   | Agent card | [/.well-known/agent-card.json](https://hawaii-conditions-prime.vercel.app/.well-known/agent-card.json) |
   | LLM instructions | [/llms.txt](https://hawaii-conditions-prime.vercel.app/llms.txt) |
@@ -215,7 +229,7 @@
 
   ## ⚡ Why this exists
 
-  Most travel data is fragmented, outdated, and not usable by AI agents. This server fixes that with structured real-time data, agent-ready APIs, and a fully autonomous payment flow powered by Stripe.
+  Most travel data is fragmented, outdated, and not usable by AI agents. This server fixes that with structured real-time data, agent-ready APIs, and autonomous payments — on-chain via x402 (USDC) or a self-serve Stripe prepaid balance.
 
   ---
 
