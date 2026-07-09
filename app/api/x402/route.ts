@@ -1,17 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TOOL_PRICES } from "@/lib/payment-challenge";
-import { TOOL_INPUT_SCHEMAS } from "@/lib/tool-schemas";
-import {
-  X402_ENABLED,
-  buildPaymentRequirements,
-  facilitatorInfo,
-  settleFromHeader,
-} from "@/lib/x402";
+import { X402_ENABLED, settleFromHeader } from "@/lib/x402";
+import { buildX402Catalog, x402RequirementsFor } from "@/lib/x402-catalog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const SERVER_URL = (process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app").replace(/\/+$/, "");
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -21,30 +14,6 @@ const CORS_HEADERS = {
   "Access-Control-Max-Age": "86400",
 };
 
-const TOOL_DESCRIPTIONS: Record<string, string> = {
-  get_weather: "5-day Hawaii forecast, UV index, wind, sunrise/sunset.",
-  get_surf_conditions: "Wave height, period, direction + 3-day surf forecast.",
-  get_trail_status: "NPS alerts and state trail closures.",
-  get_volcano_status: "Live Kīlauea status from USGS HVO.",
-  get_ocean_safety: "Box jellyfish, rip currents, NOAA marine alerts.",
-  get_full_briefing: "All five data sources combined — best value.",
-  search_restaurants: "Find restaurants by location, cuisine, price, open-now.",
-  get_restaurant_details: "Full hours, reviews, photos for a restaurant.",
-};
-
-function resourceUrl(tool: string) {
-  return `${SERVER_URL}/api/x402?tool=${tool}`;
-}
-
-function requirementsFor(tool: string) {
-  return buildPaymentRequirements({
-    priceUsd: TOOL_PRICES[tool],
-    resource: resourceUrl(tool),
-    description: TOOL_DESCRIPTIONS[tool] ?? `Hawaii Conditions tool: ${tool}.`,
-    outputSchema: TOOL_INPUT_SCHEMAS[tool],
-  });
-}
-
 export function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
@@ -52,30 +21,13 @@ export function OPTIONS() {
 // Catalog of every paid tool as an x402 resource (for marketplace discovery /
 // "generate integration code"), or — with ?tool=<name> — a single payable
 // resource that returns 402 until an `X-PAYMENT` header settles.
+// The same catalog is also mirrored at /.well-known/x402 for crawlers that
+// look there instead (see app/.well-known/x402/route.ts).
 export async function GET(req: NextRequest) {
   const tool = req.nextUrl.searchParams.get("tool");
   if (tool) return handlePayableResource(req, tool);
 
-  return NextResponse.json(
-    {
-      x402Version: 1,
-      service: "Hawaii Conditions",
-      mcp_endpoint: `${SERVER_URL}/api/mcp`,
-      x402: facilitatorInfo(),
-      enabled: X402_ENABLED,
-      resources: Object.keys(TOOL_PRICES).map((t) => ({
-        tool: t,
-        endpoint: resourceUrl(t),
-        priceUsd: TOOL_PRICES[t],
-        description: TOOL_DESCRIPTIONS[t] ?? null,
-        accepts: X402_ENABLED ? [requirementsFor(t)] : [],
-      })),
-      ...(X402_ENABLED
-        ? {}
-        : { notice: "x402 is not yet configured. Set X402_PAY_TO (recipient wallet) to enable on-chain payments." }),
-    },
-    { headers: CORS_HEADERS },
-  );
+  return NextResponse.json(buildX402Catalog(), { headers: CORS_HEADERS });
 }
 
 export function POST(req: NextRequest) {
@@ -100,7 +52,7 @@ async function handlePayableResource(req: NextRequest, tool: string) {
 
   const outcome = await settleFromHeader({
     paymentHeader: req.headers.get("X-PAYMENT"),
-    requirements: requirementsFor(tool),
+    requirements: x402RequirementsFor(tool),
   });
 
   if (!outcome.paid) {
