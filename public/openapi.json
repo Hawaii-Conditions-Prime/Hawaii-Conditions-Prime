@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "HawaiiConditions",
-    "version": "1.0.5",
+    "version": "1.0.0",
     "description": "HawaiiConditions — real-time Hawaii conditions with prepaid-balance payments via Stripe card."
   },
   "paths": {
@@ -16,9 +16,7 @@
         "x-payment-info": {
           "price": 0,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "free"
@@ -39,9 +37,7 @@
         "x-payment-info": {
           "price": 0,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "free"
@@ -89,9 +85,7 @@
         "x-payment-info": {
           "price": 0.1,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -152,9 +146,7 @@
         "x-payment-info": {
           "price": 0.1,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -223,9 +215,7 @@
         "x-payment-info": {
           "price": 0.1,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -286,9 +276,7 @@
         "x-payment-info": {
           "price": 0.1,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -357,9 +345,7 @@
         "x-payment-info": {
           "price": 0.25,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -408,9 +394,7 @@
         "x-payment-info": {
           "price": 0.25,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -473,9 +457,7 @@
         "x-payment-info": {
           "price": 0.25,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -536,9 +518,7 @@
         "x-payment-info": {
           "price": 0.25,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -607,9 +587,7 @@
         "x-payment-info": {
           "price": 0.5,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -670,9 +648,7 @@
         "x-payment-info": {
           "price": 0.5,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -741,9 +717,7 @@
         "x-payment-info": {
           "price": 0,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "free"
@@ -802,9 +776,7 @@
         "x-payment-info": {
           "price": 0,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "free"
@@ -866,9 +838,7 @@
         "x-payment-info": {
           "price": 0,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "free"
@@ -927,9 +897,7 @@
         "x-payment-info": {
           "price": 0,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "free"
@@ -991,9 +959,7 @@
         "x-payment-info": {
           "price": 2,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -1054,9 +1020,7 @@
         "x-payment-info": {
           "price": 2,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -1125,9 +1089,7 @@
         "x-payment-info": {
           "price": 0.25,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -1209,9 +1171,7 @@
         "x-payment-info": {
           "price": 0.25,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -1284,9 +1244,7 @@
         "x-payment-info": {
           "price": 0.15,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",
@@ -1338,9 +1296,7 @@
         "x-payment-info": {
           "price": 0.15,
           "currency": "USD",
-          "protocols": [
-            "stripe-card-prepaid"
-          ],
+          "protocols": [],
           "protocol": "stripe-card-prepaid",
           "pricingMode": "fixed",
           "billing": "prepaid_balance",

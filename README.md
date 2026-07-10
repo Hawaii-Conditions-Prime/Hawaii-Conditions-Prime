@@ -172,6 +172,7 @@
   | Resource | URL |
   |---|---|
   | x402 catalog | [/api/x402](https://hawaii-conditions-prime.vercel.app/api/x402) |
+  | x402 discovery manifest | [/.well-known/x402](https://hawaii-conditions-prime.vercel.app/.well-known/x402) (mirrors the catalog above at the conventional path crawlers/marketplaces check first) |
   | Server card | [/.well-known/mcp/server-card.json](https://hawaii-conditions-prime.vercel.app/.well-known/mcp/server-card.json) |
   | Agent card | [/.well-known/agent-card.json](https://hawaii-conditions-prime.vercel.app/.well-known/agent-card.json) |
   | LLM instructions | [/llms.txt](https://hawaii-conditions-prime.vercel.app/llms.txt) |
