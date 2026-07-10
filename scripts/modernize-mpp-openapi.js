@@ -19,8 +19,12 @@ const OUT_FILE   = path.resolve(__dirname, "../public/openapi.json");
 const SERVER_URL = process.env.SERVER_URL  || "https://hawaii-conditions-prime.vercel.app";
 
 /**
- * Normalises a single x-payment-info object so it always has both
- * `protocol: "stripe-card-prepaid"` and `protocols: ["stripe-card-prepaid"]`.
+ * Normalises a single x-payment-info object so it always has a
+ * `protocol: "stripe-card-prepaid"` legacy field, while leaving `protocols`
+ * untouched when it's already the AgentCash/x402-marketplace shape (an array
+ * of protocol *objects*, e.g. `[{ "x402": {} }]` or `[]`). Only back-fills
+ * `protocols` with the old string-array convention when it's altogether
+ * missing, so this never clobbers the object-array format.
  *
  * Handles two shapes:
  *  - Flat:  { price, currency, billing, protocols?, ... }
@@ -33,7 +37,7 @@ function convertPaymentInfo(info) {
   // Flat format — price is a top-level field
   if (result.price !== undefined) {
     result.protocol  = "stripe-card-prepaid";
-    result.protocols = ["stripe-card-prepaid"];
+    if (result.protocols === undefined) result.protocols = ["stripe-card-prepaid"];
   }
 
   // Options-array format
@@ -41,7 +45,7 @@ function convertPaymentInfo(info) {
     result.options = result.options.map((opt) => {
       const o = { ...opt };
       o.protocol  = o.protocol  || "stripe-card-prepaid";
-      o.protocols = o.protocols || [o.protocol];
+      if (o.protocols === undefined) o.protocols = [o.protocol];
       return o;
     });
   }
@@ -69,10 +73,14 @@ function buildLocalSpec() {
   const ISLAND_ENUM = ["oahu", "maui", "kauai", "big-island", "molokai", "lanai"];
   const islandProp  = { type: "string", enum: ISLAND_ENUM };
 
+  // Matches the AgentCash/x402-marketplace `protocols` shape used in
+  // app/openapi.json/route.ts (array of protocol objects, not names).
+  const agentPaymentProtocols = process.env.X402_PAY_TO ? [{ x402: {} }] : [];
+
   const paid = (price) => ({
     price,
     currency: "USD",
-    protocols: ["stripe-card-prepaid"],
+    protocols: agentPaymentProtocols,
     protocol:  "stripe-card-prepaid",
     pricingMode: "fixed",
     billing: "prepaid_balance",
@@ -82,7 +90,7 @@ function buildLocalSpec() {
   const free = {
     price: 0,
     currency: "USD",
-    protocols: ["stripe-card-prepaid"],
+    protocols: agentPaymentProtocols,
     protocol:  "stripe-card-prepaid",
     pricingMode: "fixed",
     billing: "free",

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { toRequestBody, sharedAuthHeader, inputSchema } from "@/lib/tool-schemas";
+import { X402_ENABLED } from "@/lib/x402";
 
 export async function GET() {
   const paymentLink = process.env.STRIPE_PAYMENT_LINK ?? "";
@@ -76,12 +77,19 @@ export async function GET() {
     },
   };
 
+  // AgentCash/x402 marketplaces recognize `protocols` as an array of protocol
+  // *objects* (e.g. `[{ "x402": {} }]`), not the plain protocol-name strings
+  // used elsewhere in this file for mppscan-style tooling — so this field is
+  // computed separately from the legacy `protocol`/`billing` metadata below,
+  // which stays as-is for backward compatibility (the two don't collide).
+  const agentPaymentProtocols = X402_ENABLED ? [{ x402: {} }] : [];
+
   const stripePrepaidInfo = (price: string, billing = "prepaid_balance") => ({
     authMode: "apiKey",
     price,
     currency: "USD",
     protocol: "stripe-card-prepaid",
-    protocols: ["stripe-card-prepaid"],
+    protocols: agentPaymentProtocols,
     pricingMode: "fixed",
     billing,
     accountHeader: "X-MCP-Account",
@@ -91,7 +99,7 @@ export async function GET() {
         price,
         currency: "USD",
         protocol: "stripe-card-prepaid",
-        protocols: ["stripe-card-prepaid"],
+        protocols: agentPaymentProtocols,
         pricingMode: "fixed",
         billing,
         accountHeader: "X-MCP-Account",
@@ -104,7 +112,7 @@ export async function GET() {
     price: "0.00",
     currency: "USD",
     protocol: "stripe-card-prepaid",
-    protocols: ["stripe-card-prepaid"],
+    protocols: agentPaymentProtocols,
     pricingMode: "fixed",
     billing: "free",
     options: [
@@ -113,7 +121,7 @@ export async function GET() {
         price: "0.00",
         currency: "USD",
         protocol: "stripe-card-prepaid",
-        protocols: ["stripe-card-prepaid"],
+        protocols: agentPaymentProtocols,
         pricingMode: "fixed",
         billing: "free",
       },
@@ -125,7 +133,7 @@ export async function GET() {
     price: "0.00",
     currency: "USD",
     protocol: "none",
-    protocols: ["none"],
+    protocols: [],
     pricingMode: "fixed",
     billing: "free",
     options: [
@@ -134,12 +142,182 @@ export async function GET() {
         price: "0.00",
         currency: "USD",
         protocol: "none",
-        protocols: ["none"],
+        protocols: [],
         pricingMode: "fixed",
         billing: "free",
       },
     ],
   };
+
+  // Output schemas for each paid/free data tool — AgentCash's discovery
+  // validator flags operations with no response schema ("Input/Output Schema
+  // Missing"), so these mirror the literal shape each app/gpt/*/route.ts
+  // handler returns today.
+  const dateTime = { type: "string", format: "date-time" };
+
+  const weatherResponseSchema = {
+    type: "object",
+    required: ["island", "temperature_f", "conditions", "wind_mph", "humidity_pct", "uv_index", "updated_at"],
+    properties: {
+      island: { type: "string" },
+      temperature_f: { type: "number" },
+      conditions: { type: "string" },
+      wind_mph: { type: "number" },
+      humidity_pct: { type: "number" },
+      uv_index: { type: "number" },
+      updated_at: dateTime,
+    },
+  };
+
+  const surfResponseSchema = {
+    type: "object",
+    required: ["island", "wave_height_ft", "swell_direction", "swell_period_s", "wind", "rating", "updated_at"],
+    properties: {
+      island: { type: "string" },
+      wave_height_ft: { type: "object", properties: { min: { type: "number" }, max: { type: "number" } }, required: ["min", "max"] },
+      swell_direction: { type: "string" },
+      swell_period_s: { type: "number" },
+      wind: { type: "string" },
+      rating: { type: "string" },
+      updated_at: dateTime,
+    },
+  };
+
+  const volcanoResponseSchema = {
+    type: "object",
+    required: ["volcano", "alert_level", "eruption_status", "lava_flow_hazard", "vog_advisory", "park_areas_closed", "updated_at"],
+    properties: {
+      volcano: { type: "string" },
+      alert_level: { type: "string" },
+      eruption_status: { type: "string" },
+      lava_flow_hazard: { type: "boolean" },
+      vog_advisory: { type: "boolean" },
+      park_areas_closed: { type: "array", items: { type: "string" } },
+      updated_at: dateTime,
+    },
+  };
+
+  const trailsResponseSchema = {
+    type: "object",
+    required: ["island", "trail", "status", "difficulty", "length_miles", "conditions", "alerts", "updated_at"],
+    properties: {
+      island: { type: "string" },
+      trail: { type: "string" },
+      status: { type: "string" },
+      difficulty: { type: "string" },
+      length_miles: { type: "number" },
+      conditions: { type: "string" },
+      alerts: { type: "array", items: { type: "string" } },
+      updated_at: dateTime,
+    },
+  };
+
+  const oceanSafetyResponseSchema = {
+    type: "object",
+    required: ["beach", "flag_color", "flag_meaning", "rip_current_risk", "jellyfish_advisory", "shark_advisory", "swimming_conditions", "lifeguard_on_duty", "updated_at"],
+    properties: {
+      beach: { type: "string" },
+      flag_color: { type: "string" },
+      flag_meaning: { type: "string" },
+      rip_current_risk: { type: "string" },
+      jellyfish_advisory: { type: "boolean" },
+      shark_advisory: { type: "boolean" },
+      swimming_conditions: { type: "string" },
+      lifeguard_on_duty: { type: "boolean" },
+      updated_at: dateTime,
+    },
+  };
+
+  const sunTimesResponseSchema = {
+    type: "object",
+    required: ["island", "date", "sunrise", "sunset", "solar_noon", "golden_hour_morning", "golden_hour_evening", "day_length_hours", "timezone"],
+    properties: {
+      island: { type: "string" },
+      date: { type: "string", format: "date" },
+      sunrise: { type: "string" },
+      sunset: { type: "string" },
+      solar_noon: { type: "string" },
+      golden_hour_morning: { type: "string" },
+      golden_hour_evening: { type: "string" },
+      day_length_hours: { type: "number" },
+      timezone: { type: "string" },
+    },
+  };
+
+  const moonPhaseResponseSchema = {
+    type: "object",
+    required: ["date", "phase", "illumination_pct", "days_to_full_moon", "days_to_new_moon", "moonrise", "moonset", "timezone"],
+    properties: {
+      date: { type: "string", format: "date" },
+      phase: { type: "string" },
+      illumination_pct: { type: "number" },
+      days_to_full_moon: { type: "number" },
+      days_to_new_moon: { type: "number" },
+      moonrise: { type: "string" },
+      moonset: { type: "string" },
+      timezone: { type: "string" },
+    },
+  };
+
+  const briefingResponseSchema = {
+    type: "object",
+    required: ["island", "summary", "weather", "surf", "ocean_safety", "volcano", "sun", "updated_at"],
+    properties: {
+      island: { type: "string" },
+      summary: { type: "string" },
+      weather: { type: "object", properties: { temperature_f: { type: "number" }, conditions: { type: "string" }, wind_mph: { type: "number" } } },
+      surf: { type: "object", properties: { rating: { type: "string" }, wave_height_ft: { type: "object", properties: { min: { type: "number" }, max: { type: "number" } } } } },
+      ocean_safety: { type: "object", properties: { flag_color: { type: "string" }, rip_current_risk: { type: "string" } } },
+      volcano: { type: "object", properties: { alert_level: { type: "string" }, lava_flow_hazard: { type: "boolean" } } },
+      sun: { type: "object", properties: { sunrise: { type: "string" }, sunset: { type: "string" } } },
+      updated_at: dateTime,
+    },
+  };
+
+  const restaurantsResponseSchema = {
+    type: "object",
+    required: ["location", "restaurants", "updated_at"],
+    properties: {
+      location: { type: "string" },
+      cuisine: { type: ["string", "null"] },
+      price: { type: ["string", "null"] },
+      restaurants: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["name", "cuisine", "area", "rating"],
+          properties: {
+            name: { type: "string" },
+            cuisine: { type: "string" },
+            area: { type: "string" },
+            rating: { type: "number" },
+          },
+        },
+      },
+      updated_at: dateTime,
+    },
+  };
+
+  const restaurantDetailsResponseSchema = {
+    type: "object",
+    required: ["place_id", "island", "cuisine", "address", "phone", "hours", "rating", "price_range", "reservations", "updated_at"],
+    properties: {
+      place_id: { type: "string" },
+      island: { type: "string" },
+      cuisine: { type: "string" },
+      address: { type: "string" },
+      phone: { type: "string" },
+      hours: { type: "string" },
+      rating: { type: "number" },
+      price_range: { type: "string" },
+      reservations: { type: "boolean" },
+      updated_at: dateTime,
+    },
+  };
+
+  function ok(description: string, schema: Record<string, unknown>) {
+    return { description, content: { "application/json": { schema } } };
+  }
 
   const p10 = stripePrepaidInfo("0.10");
   const p15 = stripePrepaidInfo("0.15");
@@ -155,8 +333,8 @@ export async function GET() {
     info: {
       title: toolName,
       version: "1.0.0",
-      description: `${toolName} is a real-time conditions API for the Hawaiian Islands, built for AI travel agents, concierge bots, itinerary planners, hotel assistants, tourism apps, and personal AI assistants. Use it to help users plan safer beach days, surfing sessions, hikes, and restaurant outings across Oʻahu, Maui, Kauaʻi, Hawaiʻi Island, Molokaʻi, and Lānaʻi. Available data: current weather, surf conditions, ocean safety advisories, trail status, volcanic activity, sunrise/sunset times, moon phase, restaurant search, restaurant details, and full island briefings. Paid tools use a Stripe prepaid balance via X-MCP-Account header.`,
-      "x-guidance": `Use get_full_briefing for a complete island overview before building a day-by-day itinerary. Use search_restaurants to find dining options by location, cuisine, or price range, then get_restaurant_details for hours, ratings, and contact info. Use get_weather, get_surf_conditions, get_ocean_safety, get_trail_status, and get_volcano_status to refine plans for specific activities. Use get_sun_times (free) and get_moon_phase (free) to anchor sunrise, sunset, and lunar context into itineraries. All paid tools require an X-MCP-Account header (Stripe prepaid balance). No token → 402 challenge. Register via register_agent tool at: ${serverUrl}/mcp`,
+      description: `${toolName} is a real-time conditions API for the Hawaiian Islands, built for AI travel agents, concierge bots, itinerary planners, hotel assistants, tourism apps, and personal AI assistants. Use it to help users plan safer beach days, surfing sessions, hikes, and restaurant outings across Oʻahu, Maui, Kauaʻi, Hawaiʻi Island, Molokaʻi, and Lānaʻi. Available data: current weather, surf conditions, ocean safety advisories, trail status, volcanic activity, sunrise/sunset times, moon phase, restaurant search, restaurant details, and full island briefings. Paid tools accept a Stripe prepaid balance via X-MCP-Account header${X402_ENABLED ? ", or on-chain USDC via the x402 protocol (see /api/x402)" : ""}.`,
+      "x-guidance": `Use get_full_briefing for a complete island overview before building a day-by-day itinerary. Use search_restaurants to find dining options by location, cuisine, or price range, then get_restaurant_details for hours, ratings, and contact info. Use get_weather, get_surf_conditions, get_ocean_safety, get_trail_status, and get_volcano_status to refine plans for specific activities. Use get_sun_times (free) and get_moon_phase (free) to anchor sunrise, sunset, and lunar context into itineraries. Paid tools accept either an X-MCP-Account header (Stripe prepaid balance; register via register_agent at ${serverUrl}/mcp)${X402_ENABLED ? " or a signed X-PAYMENT header (on-chain USDC via x402; see /api/x402 for the resource catalog)" : ""}. No credential → 402 challenge listing both options.`,
     },
     "x-discovery": {
       ownershipProofs: [] as string[],
@@ -207,7 +385,7 @@ export async function GET() {
           "x-input-schema": inputSchema("get_weather"),
           parameters: [mcpAccountParam, islandParam],
           responses: {
-            "200": { description: "Current weather conditions" },
+            "200": ok("Current weather conditions", weatherResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -221,7 +399,7 @@ export async function GET() {
           parameters: [mcpAccountParam],
           requestBody: toRequestBody("get_weather"),
           responses: {
-            "200": { description: "Current weather conditions" },
+            "200": ok("Current weather conditions", weatherResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -237,7 +415,7 @@ export async function GET() {
           "x-input-schema": inputSchema("get_surf_conditions"),
           parameters: [mcpAccountParam, islandParam],
           responses: {
-            "200": { description: "Surf conditions" },
+            "200": ok("Surf conditions", surfResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -251,7 +429,7 @@ export async function GET() {
           parameters: [mcpAccountParam],
           requestBody: toRequestBody("get_surf_conditions"),
           responses: {
-            "200": { description: "Surf conditions" },
+            "200": ok("Surf conditions", surfResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -267,7 +445,7 @@ export async function GET() {
           "x-input-schema": inputSchema("get_volcano_status"),
           parameters: [mcpAccountParam],
           responses: {
-            "200": { description: "Volcanic activity status" },
+            "200": ok("Volcanic activity status", volcanoResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -281,7 +459,7 @@ export async function GET() {
           parameters: [mcpAccountParam],
           requestBody: toRequestBody("get_volcano_status", false),
           responses: {
-            "200": { description: "Volcanic activity status" },
+            "200": ok("Volcanic activity status", volcanoResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -297,7 +475,7 @@ export async function GET() {
           "x-input-schema": inputSchema("get_trail_status"),
           parameters: [mcpAccountParam, islandParam],
           responses: {
-            "200": { description: "Trail conditions" },
+            "200": ok("Trail conditions", trailsResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -311,7 +489,7 @@ export async function GET() {
           parameters: [mcpAccountParam],
           requestBody: toRequestBody("get_trail_status"),
           responses: {
-            "200": { description: "Trail conditions" },
+            "200": ok("Trail conditions", trailsResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -327,7 +505,7 @@ export async function GET() {
           "x-input-schema": inputSchema("get_ocean_safety"),
           parameters: [mcpAccountParam, islandParam],
           responses: {
-            "200": { description: "Ocean safety conditions" },
+            "200": ok("Ocean safety conditions", oceanSafetyResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -341,7 +519,7 @@ export async function GET() {
           parameters: [mcpAccountParam],
           requestBody: toRequestBody("get_ocean_safety"),
           responses: {
-            "200": { description: "Ocean safety conditions" },
+            "200": ok("Ocean safety conditions", oceanSafetyResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -367,7 +545,7 @@ export async function GET() {
             { name: "date", in: "query", required: false, schema: { type: "string", format: "date" }, description: "Date YYYY-MM-DD" },
           ],
           responses: {
-            "200": { description: "Sunrise and sunset times" },
+            "200": ok("Sunrise and sunset times", sunTimesResponseSchema),
           },
         },
         post: {
@@ -398,7 +576,7 @@ export async function GET() {
             },
           },
           responses: {
-            "200": { description: "Sunrise and sunset times" },
+            "200": ok("Sunrise and sunset times", sunTimesResponseSchema),
           },
         },
       },
@@ -422,7 +600,7 @@ export async function GET() {
             { name: "date", in: "query", required: false, schema: { type: "string", format: "date" }, description: "Date YYYY-MM-DD" },
           ],
           responses: {
-            "200": { description: "Moon phase data" },
+            "200": ok("Moon phase data", moonPhaseResponseSchema),
           },
         },
         post: {
@@ -453,7 +631,7 @@ export async function GET() {
             },
           },
           responses: {
-            "200": { description: "Moon phase data" },
+            "200": ok("Moon phase data", moonPhaseResponseSchema),
           },
         },
       },
@@ -467,7 +645,7 @@ export async function GET() {
           "x-input-schema": inputSchema("get_full_briefing"),
           parameters: [mcpAccountParam, islandParam],
           responses: {
-            "200": { description: "Full conditions briefing" },
+            "200": ok("Full conditions briefing", briefingResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -481,7 +659,7 @@ export async function GET() {
           parameters: [mcpAccountParam],
           requestBody: toRequestBody("get_full_briefing"),
           responses: {
-            "200": { description: "Full conditions briefing" },
+            "200": ok("Full conditions briefing", briefingResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -503,7 +681,7 @@ export async function GET() {
             { name: "open_now", in: "query", required: false, schema: { type: "boolean" }, description: "Filter for currently open restaurants" },
           ],
           responses: {
-            "200": { description: "Restaurant list" },
+            "200": ok("Restaurant list", restaurantsResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -517,7 +695,7 @@ export async function GET() {
           parameters: [mcpAccountParam],
           requestBody: toRequestBody("search_restaurants"),
           responses: {
-            "200": { description: "Restaurant list" },
+            "200": ok("Restaurant list", restaurantsResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -536,7 +714,7 @@ export async function GET() {
             { name: "place_id", in: "query", required: true, schema: { type: "string" }, description: "Google place_id returned from search_restaurants" },
           ],
           responses: {
-            "200": { description: "Restaurant details" },
+            "200": ok("Restaurant details", restaurantDetailsResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
@@ -550,7 +728,7 @@ export async function GET() {
           parameters: [mcpAccountParam],
           requestBody: toRequestBody("get_restaurant_details"),
           responses: {
-            "200": { description: "Restaurant details" },
+            "200": ok("Restaurant details", restaurantDetailsResponseSchema),
             "402": paymentChallenge402,
           },
           security: paidSecurity,
