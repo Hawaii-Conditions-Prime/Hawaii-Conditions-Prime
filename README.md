@@ -196,8 +196,8 @@
   | `SERVER_URL` | Yes | Your Vercel URL, no trailing slash |
   | `X402_PAY_TO` | No | EVM wallet address that receives x402 USDC payments. Setting this enables the on-chain x402 rail. |
   | `X402_NETWORK` | No | `base` (mainnet) or `base-sepolia` (testnet, default) |
-  | `CDP_API_KEY_ID` | For mainnet | Coinbase Developer Platform API key ID — required to settle on Base mainnet |
-  | `CDP_API_KEY_SECRET` | For mainnet | CDP API key secret (PEM EC or base64 Ed25519) |
+  | `CDP_API_KEY_ID` | For `/api/x402/<name>`; mainnet-only on the MCP rail | Coinbase Developer Platform API key ID. The per-tool `/api/x402/<name>` resources always settle through the CDP facilitator (testnet and mainnet alike); the legacy MCP `X-PAYMENT` rail only needs this for mainnet. |
+  | `CDP_API_KEY_SECRET` | Same as above | CDP API key secret (PEM EC or base64 Ed25519) |
   | `X402_FACILITATOR_URL` | No | Override the facilitator base URL (defaults: CDP when keys present, else `https://x402.org/facilitator`) |
 
   3. Push to `main`. Vercel auto-deploys.
@@ -206,25 +206,34 @@
 
   Paid tools accept **two** payment rails. Agents can either top up a Stripe
   prepaid balance (`X-MCP-Account`) **or** pay per-call on-chain with USDC using
-  the [x402](https://x402.org) protocol — no account or registration required.
+  the [x402](https://x402.org) protocol (v2 transport) — no account or
+  registration required.
 
-  Once `X402_PAY_TO` is set, every paid endpoint returns a standards-compliant
-  `402` with an `accepts` array; the agent resigns the request with an
-  `X-PAYMENT` header, which the server verifies and settles via the facilitator
-  and echoes back in `X-PAYMENT-RESPONSE`. This makes the API discoverable and
-  payable on agentic marketplaces (e.g. the Coinbase x402 Bazaar).
+  Once `X402_PAY_TO`, `CDP_API_KEY_ID`, and `CDP_API_KEY_SECRET` are set, each
+  tool is its own payable x402 v2 resource, built on the official
+  [`@x402/core`](https://www.npmjs.com/package/@x402/core) +
+  [`@coinbase/cdp-sdk`](https://www.npmjs.com/package/@coinbase/cdp-sdk)
+  packages. Every paid endpoint returns a standards-compliant `402` (with the
+  requirements also base64-encoded in a `PAYMENT-REQUIRED` header); the agent
+  resigns the request with a `PAYMENT-SIGNATURE` header, which the server
+  verifies and settles via the Coinbase CDP facilitator and echoes back in
+  `PAYMENT-RESPONSE`. Each resource also advertises a Bazaar discovery
+  extension, so the API is automatically indexed on x402 marketplaces (e.g.
+  the Coinbase x402 Bazaar and directories built on it, like
+  [agentic.market](https://agentic.market)) once it has processed its first
+  real payment — check compliance any time with
+  [agentic.market/validate](https://agentic.market/validate).
 
   - Discovery / resource catalog: `GET /api/x402`
-  - Per-tool payable resource: `GET|POST /api/x402?tool=<name>`
-  - MCP endpoint (`POST /api/mcp`) also accepts the `X-PAYMENT` header on paid `tools/call`.
+  - Per-tool payable resource: `GET /api/x402/<name>` (e.g. `/api/x402/get_weather`)
+  - MCP endpoint (`POST /api/mcp`) has its own, separate on-chain rail: it
+    still accepts the legacy x402 v1 `X-PAYMENT` header on paid `tools/call`.
 
-  **Testnet vs mainnet:** on `base-sepolia` the public `x402.org` facilitator
-  settles for free. On `base` (mainnet, real USDC) settlement runs through the
-  authenticated Coinbase **CDP facilitator** — create an API key at the Coinbase
-  Developer Platform and set `CDP_API_KEY_ID` / `CDP_API_KEY_SECRET`. The
-  `GET /api/x402` catalog reports `facilitatorMode` and `settlementReady` so you
-  can confirm mainnet is fully wired (`settlementReady` is `false` on mainnet
-  until the CDP keys are present).
+  **CDP credentials are required for both networks** — the CDP facilitator
+  handles settlement on `base-sepolia` (testnet) and `base` (mainnet, real
+  USDC) alike, so `CDP_API_KEY_ID` / `CDP_API_KEY_SECRET` (from the Coinbase
+  Developer Platform) must be set before any `/api/x402/<name>` resource will
+  return a real `402` instead of `503 x402_misconfigured`.
 
   ---
 
