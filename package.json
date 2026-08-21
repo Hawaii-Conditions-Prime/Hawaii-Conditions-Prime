@@ -14,6 +14,7 @@
     "mpp:scan": "npx -y @agentcash/discovery@latest discover \"https://hawaii-conditions-prime.vercel.app\""
   },
   "dependencies": {
+    "@coinbase/cdp-sdk": "^1.55.0",
     "@coinbase/x402": "^2.1.0",
     "@modelcontextprotocol/sdk": "^1.12.0",
     "@neondatabase/serverless": "^0.10.4",
@@ -21,6 +22,10 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "stripe": "^17.0.0",
+    "@x402/core": "^2.23.0",
+    "@x402/evm": "^2.23.0",
+    "@x402/extensions": "^2.23.0",
+    "@x402/svm": "^2.23.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {

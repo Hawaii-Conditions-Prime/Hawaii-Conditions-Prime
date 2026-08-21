@@ -2,10 +2,13 @@
 // endpoint and the /.well-known/x402 discovery manifest, so agent crawlers
 // (e.g. AgentCash, the Coinbase x402 Bazaar) see identical data at either
 // conventional path.
+//
+// This is a plain informational index — no payment processing happens here.
+// Each listed endpoint (/api/x402/<tool>) is its own x402 v2 resource,
+// implemented in lib/x402-server.ts.
 
 import { TOOL_PRICES } from "./payment-challenge";
-import { TOOL_INPUT_SCHEMAS } from "./tool-schemas";
-import { X402_ENABLED, buildPaymentRequirements, facilitatorInfo, type PaymentRequirements } from "./x402";
+import { X402_ENABLED, X402_NETWORK } from "./x402";
 
 const SERVER_URL = (process.env.SERVER_URL ?? "https://hawaii-conditions-prime.vercel.app").replace(/\/+$/, "");
 
@@ -21,34 +24,25 @@ export const TOOL_DESCRIPTIONS: Record<string, string> = {
 };
 
 export function x402ResourceUrl(tool: string): string {
-  return `${SERVER_URL}/api/x402?tool=${tool}`;
-}
-
-export function x402RequirementsFor(tool: string): PaymentRequirements {
-  return buildPaymentRequirements({
-    priceUsd: TOOL_PRICES[tool],
-    resource: x402ResourceUrl(tool),
-    description: TOOL_DESCRIPTIONS[tool] ?? `Hawaii Conditions tool: ${tool}.`,
-    outputSchema: TOOL_INPUT_SCHEMAS[tool],
-  });
+  return `${SERVER_URL}/api/x402/${tool}`;
 }
 
 export function buildX402Catalog() {
   return {
-    x402Version: 1,
+    x402Version: 2,
     service: "Hawaii Conditions",
     mcp_endpoint: `${SERVER_URL}/api/mcp`,
-    x402: facilitatorInfo(),
+    network: X402_NETWORK === "base" ? "eip155:8453" : "eip155:84532",
     enabled: X402_ENABLED,
     resources: Object.keys(TOOL_PRICES).map((t) => ({
       tool: t,
       endpoint: x402ResourceUrl(t),
+      method: "GET",
       priceUsd: TOOL_PRICES[t],
       description: TOOL_DESCRIPTIONS[t] ?? null,
-      accepts: X402_ENABLED ? [x402RequirementsFor(t)] : [],
     })),
     ...(X402_ENABLED
       ? {}
-      : { notice: "x402 is not yet configured. Set X402_PAY_TO (recipient wallet) to enable on-chain payments." }),
+      : { notice: "x402 is not yet configured. Set X402_PAY_TO, CDP_API_KEY_ID, and CDP_API_KEY_SECRET to enable on-chain payments." }),
   };
 }
