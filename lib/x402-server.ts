@@ -14,6 +14,7 @@ import type { HTTPAdapter } from "@x402/core/server";
 import type { NextRequest } from "next/server";
 
 import { TOOL_PRICES } from "./payment-challenge";
+import { bazaarExtensionFor } from "./x402-discovery";
 import { TOOL_DESCRIPTIONS } from "./x402-catalog";
 import { X402_ENABLED, X402_NETWORK, X402_PAY_TO } from "./x402";
 
@@ -34,6 +35,9 @@ export function getX402Server(): Promise<X402Server> {
       routes[`GET /api/x402/${tool}`] = {
         price: `$${priceUsd.toFixed(2)}`,
         description: TOOL_DESCRIPTIONS[tool] ?? `Hawaii Conditions tool: ${tool}.`,
+        // Overrides the SDK's minimal auto-generated bazaar declaration with
+        // per-tool input/output examples.
+        extensions: bazaarExtensionFor(tool, priceUsd),
       };
     }
 
