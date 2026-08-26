@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { executeTool } from "@/lib/data";
 import { TOOL_PRICES } from "@/lib/payment-challenge";
 import { X402_ENABLED, getX402Server, nextRequestAdapter } from "@/lib/x402-server";
 
@@ -65,6 +66,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ tool
     return NextResponse.json({ error: "route_not_payment_protected", tool }, { status: 500, headers: CORS_HEADERS });
   }
 
+  // Payment is verified but NOT yet settled. Fetch the data first so an
+  // upstream failure returns an error without charging the agent — settle
+  // only once there is something to hand back.
+  let data: unknown;
+  try {
+    data = await executeTool(tool, Object.fromEntries(req.nextUrl.searchParams));
+  } catch (err) {
+    return NextResponse.json(
+      {
+        error: "upstream_unavailable",
+        tool,
+        message: (err as Error).message,
+        note: "No payment was settled for this request.",
+      },
+      { status: 502, headers: CORS_HEADERS },
+    );
+  }
+
   const settlement = await server.processSettlement(result.paymentPayload, result.paymentRequirements, result.declaredExtensions);
 
   if (!settlement.success) {
@@ -80,7 +99,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ tool
       tool,
       paid_usd: TOOL_PRICES[tool],
       payer: settlement.payer ?? null,
-      note: "Payment settled via x402. Replace this placeholder with live data fetching for the tool.",
+      data,
     },
     { headers: { ...CORS_HEADERS, ...settlement.headers } },
   );

@@ -5,12 +5,14 @@ import { TOOL_INPUT_SCHEMAS } from "@/lib/tool-schemas";
 import { stripe } from "@/lib/stripe";
 import sql from "@/lib/db";
 import {
+  creditBalance,
   deductBalance,
   getAccountByKey,
   getTransactions,
   registerAgent,
   toBalanceResponse,
 } from "@/lib/ledger";
+import { executeTool } from "@/lib/data";
 import {
   X402_ENABLED,
   buildPaymentRequirements,
@@ -253,11 +255,46 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const result = await callTool(toolName, args, auth);
+    let result: { content: Array<{ type: string; text: string }> };
+    try {
+      result = await callTool(toolName, args, auth);
+    } catch (error) {
+      // The prepaid rail debits before the tool runs, so an upstream failure
+      // would otherwise charge for nothing — put the money back.
+      if (cost > 0 && !settlementHeader && auth) {
+        await refundPrepaid(auth, cost, toolName);
+      }
+      return json(
+        {
+          jsonrpc: "2.0",
+          id,
+          error: {
+            code: -32002,
+            message: `Upstream data source failed for ${toolName}: ${(error as Error).message}`,
+            data: { refunded: cost > 0 && !settlementHeader ? cost : 0 },
+          },
+        },
+        200,
+        MCP_POST_PAYMENT_INFO,
+      );
+    }
+
     return json({ jsonrpc: "2.0", id, result }, 200, MCP_POST_PAYMENT_INFO, settlementHeader ? { "X-PAYMENT-RESPONSE": settlementHeader } : undefined);
   }
 
   return json({ jsonrpc: "2.0", id, error: { code: -32601, message: `Unsupported method: ${method}` } }, 200, MCP_POST_PAYMENT_INFO);
+}
+
+// Best-effort reversal of a prepaid debit when the tool itself failed.
+// A failed refund must not mask the original upstream error, so it is logged
+// rather than thrown.
+async function refundPrepaid(auth: string, cents: number, tool: string): Promise<void> {
+  try {
+    const account = await getAccountByKey(auth);
+    if (account) await creditBalance(account.id, cents, `refund: ${tool} upstream failure`);
+  } catch (err) {
+    console.error(`refund failed for ${tool}:`, err);
+  }
 }
 
 async function callTool(tool: string, args: Record<string, unknown>, auth: string | null): Promise<{ content: Array<{ type: string; text: string }> }> {
@@ -337,7 +374,7 @@ async function callTool(tool: string, args: Record<string, unknown>, auth: strin
     case "get_full_briefing":
     case "search_restaurants":
     case "get_restaurant_details":
-      return text(JSON.stringify({ ok: true, paid: TOOL_COSTS[tool] > 0, charged_cents: TOOL_COSTS[tool], tool, args, note: "Balance was deducted before this response. Replace this placeholder with live data fetching." }));
+      return text(JSON.stringify(await executeTool(tool, args)));
 
     default:
       return text(JSON.stringify({ error: `Unknown tool: ${tool}` }));
