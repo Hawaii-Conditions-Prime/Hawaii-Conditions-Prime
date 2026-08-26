@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeTool } from "@/lib/data";
 import { TOOL_PRICES } from "@/lib/payment-challenge";
+import { missingX402Env } from "@/lib/x402-catalog";
 import { X402_ENABLED, getX402Server, nextRequestAdapter } from "@/lib/x402-server";
 
 export const runtime = "nodejs";
@@ -30,8 +31,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ tool
   }
 
   if (!X402_ENABLED) {
+    const missing = missingX402Env();
     return NextResponse.json(
-      { error: "x402_not_configured", message: "Set X402_PAY_TO to enable on-chain payments." },
+      {
+        error: "x402_not_configured",
+        message: missing.length
+          ? `This deployment cannot see: ${missing.join(", ")}. Set them for the Production environment in Vercel and redeploy.`
+          : "X402_PAY_TO is set but empty.",
+        missing_env: missing,
+      },
       { status: 503, headers: CORS_HEADERS },
     );
   }
