@@ -41,8 +41,24 @@ export function buildX402Catalog() {
       priceUsd: TOOL_PRICES[t],
       description: TOOL_DESCRIPTIONS[t] ?? null,
     })),
-    ...(X402_ENABLED
-      ? {}
-      : { notice: "x402 is not yet configured. Set X402_PAY_TO, CDP_API_KEY_ID, and CDP_API_KEY_SECRET to enable on-chain payments." }),
+    ...(X402_ENABLED ? {} : { notice: configNotice(), missing_env: missingX402Env() }),
   };
+}
+
+// Names only — never values. "Set the env vars" is untestable from outside the
+// deployment, so the catalog reports which of them the running instance
+// actually sees. This is what distinguishes "not deployed yet" from "set in
+// the wrong environment scope".
+export function missingX402Env(): string[] {
+  return (["X402_PAY_TO", "CDP_API_KEY_ID", "CDP_API_KEY_SECRET"] as const).filter(
+    (name) => !(process.env[name] ?? "").trim(),
+  );
+}
+
+function configNotice(): string {
+  const missing = missingX402Env();
+  if (missing.length === 0) {
+    return "x402 credentials are present but payments are disabled — check X402_PAY_TO is a non-empty wallet address.";
+  }
+  return `x402 is not configured on this deployment. The running instance cannot see: ${missing.join(", ")}. Set them for the Production environment in Vercel, then redeploy (env vars are bound at build time).`;
 }
